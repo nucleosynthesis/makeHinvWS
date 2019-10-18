@@ -35,8 +35,9 @@ int makeWS(){
     /////////////////////////////////////////////////////////////////////////////////////////
     //Hardcoded input parameters
     //To be adjusted to channel !
-
-    std::string lChannel = "VBF";
+    
+    std::string lCategoryName = "VBF_Trig";
+    std::string lChannel = "VBFTrig";
     std::string lOutFileName = "param_ws_"+lChannel+".root";
 
     //define the variable that is fitted
@@ -181,7 +182,7 @@ int makeWS(){
     RooDataHist *bkg_hist[nR][nP][nS];
     for (unsigned iR(0); iR<nR; ++iR){
       
-      data_hist[iR] = new RooDataHist(("data_obs_"+lRegions[iR]).c_str(),"Data observed",vars,histos[iR][PROCESS::data][0]);
+      data_hist[iR] = new RooDataHist((lCategoryName+"data_obs_hist_"+lRegions[iR]).c_str(),"Data observed",vars,histos[iR][PROCESS::data][0]);
       wspace.import(*data_hist[iR]);
       
       for (unsigned iP(1); iP<nP; ++iP){
@@ -192,7 +193,7 @@ int makeWS(){
 	    label << "_" << lSysts[iS];
 	  }
 	  if (histos[iR][iP][iS] && histos[iR][iP][iS]->GetEntries()>0){
-	    bkg_hist[iR][iP][iS] = new RooDataHist(label.str().c_str(),"Background",vars,histos[iR][iP][iS]);
+	    bkg_hist[iR][iP][iS] = new RooDataHist((lCategoryName+label.str()).c_str(),"Background",vars,histos[iR][iP][iS]);
 	    wspace.import(*bkg_hist[iR][iP][iS]);
 	  }
 	}
@@ -205,9 +206,9 @@ int makeWS(){
     RooRealVar *jesWW[nT];
     RooRealVar *jesZZ[nT];
     for (unsigned iT(0); iT<nT; ++iT){     
-      wzratio[iT] = new RooRealVar(("wzratio"+lType[iT]).c_str(), (lType[iT]+" W/Z ratio nuisance parameter").c_str(),0);
-      jesWW[iT] = new RooRealVar(("jesWW"+lType[iT]).c_str(), (lType[iT]+" W/W JES nuisance parameter").c_str(),0);
-      jesZZ[iT] = new RooRealVar(("jesZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JES nuisance parameter").c_str(),0);
+      wzratio[iT] = new RooRealVar((lCategoryName+"wzratio"+lType[iT]).c_str(), (lType[iT]+" W/Z ratio nuisance parameter").c_str(),0);
+      jesWW[iT] = new RooRealVar((lCategoryName+"jesWW"+lType[iT]).c_str(), (lType[iT]+" W/W JES nuisance parameter").c_str(),0);
+      jesZZ[iT] = new RooRealVar((lCategoryName+"jesZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JES nuisance parameter").c_str(),0);
     }
 
 
@@ -220,7 +221,7 @@ int makeWS(){
       std::ostringstream lname;
       lname.str("");
       lname << "TF_syst_" << lNuis[iN];
-      TFsysts[iN] = new RooRealVar(lname.str().c_str(),"CR/SR ratio syst nuisance parameter",0);
+      TFsysts[iN] = new RooRealVar((lCategoryName+lname.str()).c_str(),"CR/SR ratio syst nuisance parameter",0);
     }
 
 
@@ -237,7 +238,7 @@ int makeWS(){
 
 	lname.str("");
 	lname << lType[iT] << "Z_SR_bin" << iB;
-	RooRealVar binParZ(lname.str().c_str(),(lType[iT]+" Z+jets yield in signal region, per bin").c_str(),histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB),0,10*histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB));
+	RooRealVar binParZ((lCategoryName+lname.str()).c_str(),(lType[iT]+" Z+jets yield in signal region, per bin").c_str(),histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB),0,10*histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB));
 
 
 	if (iT==0) {
@@ -246,7 +247,7 @@ int makeWS(){
 	  //program link between QCD and EWK yields in SR
 	  lname.str("");
 	  lname << "ewkqcdratio_stat_bin" << iB;
-	  ewkqcdratiostat[iB] = new RooRealVar(lname.str().c_str()," EWK/QCD ratio stat nuisance parameter",0);
+	  ewkqcdratiostat[iB] = new RooRealVar((lCategoryName+lname.str()).c_str()," EWK/QCD ratio stat nuisance parameter",0);
 	  lname.str("");
 	  lname << "TF_EWKQCDSR_bin" << iB;
 	  std::ostringstream lFormula;
@@ -255,11 +256,11 @@ int makeWS(){
 	  lFormula << ratio;
 	  lFormula << "*TMath::Power(" << ratiostat << ",@0)";
 	  
-	  RooFormulaVar TFEWKQCD(lname.str().c_str(),"Transfer factor EWK/QCD Z",lFormula.str().c_str(),RooArgList(*(ewkqcdratiostat[iB])) );
+	  RooFormulaVar TFEWKQCD((lCategoryName+lname.str()).c_str(),"Transfer factor EWK/QCD Z",lFormula.str().c_str(),RooArgList(*(ewkqcdratiostat[iB])) );
 	  wspace.import(TFEWKQCD,RooFit::RecycleConflictNodes());
 	  lname.str("");
 	  lname << "EWKQCD_SR_bin" << iB;
-	  EWKQCDbin = new RooFormulaVar(lname.str().c_str(),"EWK Z+jets yield in signal regions from QCD Z yield, per bin","@0*@1",RooArgList(TFEWKQCD,binParZ));
+	  EWKQCDbin = new RooFormulaVar((lCategoryName+lname.str()).c_str(),"EWK Z+jets yield in signal regions from QCD Z yield, per bin","@0*@1",RooArgList(TFEWKQCD,binParZ));
 	  wspace.import((*EWKQCDbin),RooFit::RecycleConflictNodes());
 	}
 
@@ -268,7 +269,7 @@ int makeWS(){
 	//RooFormulaVar EWKQCDbin = *wspace.function(lname.str().c_str());
 	lname.str("");
 	lname << lType[iT] << "wzratio_stat_bin" << iB;
-	wzratiostat[iT][iB] = new RooRealVar(lname.str().c_str(),"W/Z ratio stat nuisance parameter",0);
+	wzratiostat[iT][iB] = new RooRealVar((lCategoryName+lname.str()).c_str(),"W/Z ratio stat nuisance parameter",0);
 	lname.str("");
 	lname << lType[iT] << "TF_WZSR_bin" << iB;
 	std::ostringstream lFormula;
@@ -287,12 +288,12 @@ int makeWS(){
 
 	std::cout << " ---- Check stat error " << lType[iT] << " WZratio: " << ratiostat << std::endl;
 	
-	RooFormulaVar TFWZ(lname.str().c_str(),"Transfer factor W/Z",lFormula.str().c_str(),RooArgList(*(wzratio[iT]),*(wzratiostat[iT][iB])) );
+	RooFormulaVar TFWZ((lCategoryName+lname.str()).c_str(),"Transfer factor W/Z",lFormula.str().c_str(),RooArgList(*(wzratio[iT]),*(wzratiostat[iT][iB])) );
 	wspace.import(TFWZ,RooFit::RecycleConflictNodes());
 
 	lname.str("");
 	lname << lType[iT] << "WZ_SR_bin" << iB;
-	RooFormulaVar WZbin(lname.str().c_str(),(lType[iT]+" W+jets yield in signal regions from Z yield, per bin").c_str(),"@0*@1",iT==0?RooArgList(TFWZ,binParZ):RooArgList(TFWZ,*(EWKQCDbin)));
+	RooFormulaVar WZbin((lCategoryName+lname.str()).c_str(),(lType[iT]+" W+jets yield in signal regions from Z yield, per bin").c_str(),"@0*@1",iT==0?RooArgList(TFWZ,binParZ):RooArgList(TFWZ,*(EWKQCDbin)));
 	wspace.import(WZbin,RooFit::RecycleConflictNodes());
 	
 	if (iT==0) std::cout << " --- SR QCD Z yield = " << histos[0][PROCESS::QCDZnunu][0]->GetBinContent(iB) << " SR QCD W yield = " << histos[0][PROCESS::QCDW][0]->GetBinContent(iB) << " SR signal yield = " << histos[0][PROCESS::VBFH][0]->GetBinContent(iB) << std::endl;
@@ -304,7 +305,7 @@ int makeWS(){
 	  
 	  lname.str("");
 	  lname << lType[iT] << "TF_" << lRegions[iR] << "_stat_bin" << iB;
-	  TFstat[iT][iB][iR-1] = new RooRealVar(lname.str().c_str(),"CR/SR ratio stat nuisance parameter",0);
+	  TFstat[iT][iB][iR-1] = new RooRealVar((lCategoryName+lname.str()).c_str(),"CR/SR ratio stat nuisance parameter",0);
 	  ratio = 0;
 	  ratiostat = 0;
 	  std::cout << " ----- Check process names for CR/SR ratio: " << lProcs[vproc[iT][iR]] << " with " ;
@@ -361,11 +362,11 @@ int makeWS(){
 
 	  lname.str("");
 	  lname << lType[iT] << "TF_" << lRegions[iR] << "_bin" << iB;
-	  RooFormulaVar TF(lname.str().c_str(),"Transfer factor CR/SR",lFormula.str().c_str(),nuisances);
+	  RooFormulaVar TF((lCategoryName+lname.str()).c_str(),"Transfer factor CR/SR",lFormula.str().c_str(),nuisances);
 	  wspace.import(TF,RooFit::RecycleConflictNodes());
 	  lname.str("");
 	  lname << lType[iT] << "V_" << lRegions[iR] << "_bin" << iB;
-	  RooFormulaVar CRbin(lname.str().c_str(),(lType[iT]+" V+jets yield in control regions, per bin").c_str(),"@0*@1",iR<3?RooArgList(TF,WZbin):iT==0?RooArgList(TF,binParZ):RooArgList(TF,*(EWKQCDbin)));
+	  RooFormulaVar CRbin((lCategoryName+lname.str()).c_str(),(lType[iT]+" V+jets yield in control regions, per bin").c_str(),"@0*@1",iR<3?RooArgList(TF,WZbin):iT==0?RooArgList(TF,binParZ):RooArgList(TF,*(EWKQCDbin)));
 	  wspace.import(CRbin,RooFit::RecycleConflictNodes());
 	  
 	  if (iR==3) std::cout << " ---- CR " << lRegions[iR] << " V yield = " << histos[iR][vproc[iT][iR]][0]->GetBinContent(iB) << " data yield " << histos[iR][0][0]->GetBinContent(iB) << std::endl;
@@ -389,29 +390,29 @@ int makeWS(){
 	} else {
 	  lname << "EWKQCD_SR_bin" << iB+1;
 	}
-	if ( (iT==0 && !wspace.var(lname.str().c_str())) ||
-	     (iT==1 && !wspace.function(lname.str().c_str()))
+	if ( (iT==0 && !wspace.var((lCategoryName+lname.str()).c_str())) ||
+	     (iT==1 && !wspace.function((lCategoryName+lname.str()).c_str()))
 	     ) {
 	  std::cout << "Error for " << lType[iT] << " Z bin " << iB << " " << lname.str() << std::endl;
 	  return 1;
 	}
-	if (iT==0) Z_SR_bins[iT].add(*wspace.var(lname.str().c_str()));
-	else Z_SR_bins[iT].add(*wspace.function(lname.str().c_str()));
+	if (iT==0) Z_SR_bins[iT].add(*wspace.var((lCategoryName+lname.str()).c_str()));
+	else Z_SR_bins[iT].add(*wspace.function((lCategoryName+lname.str()).c_str()));
 	lname.str("");
 	lname << lType[iT] << "WZ_SR_bin" << iB+1;
-	if (!wspace.function(lname.str().c_str())) {
+	if (!wspace.function((lCategoryName+lname.str()).c_str())) {
 	  std::cout << "Error for " << lType[iT] << " W bin " << iB << " " << lname.str() << std::endl;
 	  return 1;
 	}
-	W_SR_bins[iT].add(*wspace.function(lname.str().c_str()));
+	W_SR_bins[iT].add(*wspace.function((lCategoryName+lname.str()).c_str()));
 	for (unsigned iR(1); iR<nR; ++iR){
 	  lname.str("");
 	  lname << lType[iT] << "V_" << lRegions[iR] << "_bin" << iB+1;
-	  if (!wspace.function(lname.str().c_str())) {
+	  if (!wspace.function((lCategoryName+lname.str()).c_str())) {
 	    std::cout << "Error for  " << lType[iT] << " Z bin " << iB << " region " << lRegions[iR] << " " << lname.str() << std::endl;
 	    return 1;
 	  }
-	  V_CR_bins[iT][iR-1].add(*wspace.function(lname.str().c_str()));
+	  V_CR_bins[iT][iR-1].add(*wspace.function((lCategoryName+lname.str()).c_str()));
 	}
       }//loop on bins
     }//loop on types
@@ -424,12 +425,12 @@ int makeWS(){
     for (unsigned iT(0); iT<nT; ++iT){     
       std::cout << " -- Processing type " << lType[iT] << std::endl;
 
-      RooParametricHist p_Z((lType[iT]+"Z_SR").c_str(), (lType[iT]+"Z+jets PDF in signal region").c_str(),lVarFit,Z_SR_bins[iT],dummyHist);
+      RooParametricHist p_Z((lCategoryName+lType[iT]+"Z_SR").c_str(), (lType[iT]+"Z+jets PDF in signal region").c_str(),lVarFit,Z_SR_bins[iT],dummyHist);
       // Always include a _norm term which should be the sum of the yields (thats how combine likes to play with pdfs)
-      RooAddition p_Z_norm((lType[iT]+"Z_SR_norm").c_str(),("Total Number of events from "+lType[iT]+" Z+jets in signal region").c_str(),Z_SR_bins[iT]);
+      RooAddition p_Z_norm((lCategoryName+lType[iT]+"Z_SR_norm").c_str(),("Total Number of events from "+lType[iT]+" Z+jets in signal region").c_str(),Z_SR_bins[iT]);
       
-      RooParametricHist p_W((lType[iT]+"W_SR").c_str(), (lType[iT]+"W+jets PDF in signal region").c_str(),lVarFit,W_SR_bins[iT],dummyHist);
-      RooAddition p_W_norm((lType[iT]+"W_SR_norm").c_str(),("Total Number of events from "+lType[iT]+" W+jets in signal region").c_str(),W_SR_bins[iT]);
+      RooParametricHist p_W((lCategoryName+lType[iT]+"W_SR").c_str(), (lType[iT]+"W+jets PDF in signal region").c_str(),lVarFit,W_SR_bins[iT],dummyHist);
+      RooAddition p_W_norm((lCategoryName+lType[iT]+"W_SR_norm").c_str(),("Total Number of events from "+lType[iT]+" W+jets in signal region").c_str(),W_SR_bins[iT]);
     
       std::cout << " -- Importing the parametric hists" << std::endl;
     
@@ -444,9 +445,9 @@ int makeWS(){
       for (unsigned iR(1); iR<nR; ++iR){
 	std::ostringstream lname;
 	lname << lType[iT] << "V_" << lRegions[iR];
-	RooParametricHist p_CRV(lname.str().c_str(), "Background PDF in control region",lVarFit,V_CR_bins[iT][iR-1],dummyHist);
+	RooParametricHist p_CRV((lCategoryName+lname.str()).c_str(), "Background PDF in control region",lVarFit,V_CR_bins[iT][iR-1],dummyHist);
 	lname << "_norm";
-	RooAddition p_CRV_norm(lname.str().c_str(),("Total Number of events from "+lType[iT]+" V+jets background in control region").c_str(),V_CR_bins[iT][iR-1]);
+	RooAddition p_CRV_norm((lCategoryName+lname.str()).c_str(),("Total Number of events from "+lType[iT]+" V+jets background in control region").c_str(),V_CR_bins[iT][iR-1]);
 	wspace.import(p_CRV);
 	wspace.import(p_CRV_norm,RooFit::RecycleConflictNodes());
       }
