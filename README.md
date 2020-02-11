@@ -13,7 +13,7 @@ Combine workspace creator for the VBF H(Inv) analysis.
 
 # Instructions:
 
-Following through the analysis steps (fast_carpenter and fast_datacard), in the same directory as ```fast_datacard`` output:
+Following through the analysis steps (fast_carpenter and fast_datacard), in the same directory as ```fast_datacard``` output:
 
 ```
 root -l makeWS_percategory.C
