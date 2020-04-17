@@ -58,43 +58,49 @@ int makeWS_percategory(){
 			      "DY","EWKZll",
 			      "TOP","VV","QCD"};
 
-    const unsigned nN = 17;
-    std::string lNuis[17] = {"bjet_veto","pileup","tau_veto",
+    const unsigned nN = 20;
+    std::string lNuis[20] = {"bjet_veto","pileup","tau_veto",
 			     "eventVetoVEleIdIso","eventVetoLMuId","eventVetoLMuIso",
 			     "eventSelTEleIdIso","eventSelTMuId","eventSelTMuIso",
       			     "eventSelVEleIdIso","eventSelLMuId","eventSelLMuIso",
                              "fnlo_SF_QCD_corr_EWK_proc", "fnlo_SF_EWK_corr",
                              "fnlo_SF_QCD_corr_QCD_proc_muF","fnlo_SF_QCD_corr_QCD_proc_muR","fnlo_SF_QCD_corr_QCD_proc_pdf",
+                             "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco"
     };
 
     const unsigned nS = 2*nN+1;
-    std::string lSysts[35];
+    std::string lSysts[41];
     for (unsigned iS(0); iS<nS; ++iS){
       if (iS==0) lSysts[iS] = "";
       else lSysts[iS] = (iS-1)%2==0? lNuis[(iS-1)/2]+"Up" : lNuis[(iS-1)/2]+"Down";
       //std::cout << lSysts[iS] << std::endl;
     }
-    const bool isSRsyst[35] = {1,1,1,1,1,
+    const bool isSRsyst[41] = {1,1,1,1,1,
 			       1,1,1,1,1,
 			       1,1,1,0,0,
 			       0,0,0,0,0,
 			       0,0,0,0,0,
                                1,1,1,1,
-                               1,1,1,1,1,1};
-    const bool isCRWsyst[35] = {1,1,1,1,1,
+                               1,1,1,1,1,1,
+                               0,0,0,0,1,1};
+
+    const bool isCRWsyst[41] = {1,1,1,1,1,
 				1,1,0,0,0,
 				0,0,0,1,1,
 				1,1,1,1,0,
 				0,0,0,0,0,
                                 1,1,1,1,
-                                1,1,1,1,1,1};
-    const bool isCRZsyst[35] = {1,1,1,1,1,
+                                1,1,1,1,1,1,
+                                0,0,1,1,0,0};
+
+    const bool isCRZsyst[41] = {1,1,1,1,1,
                                 1,1,0,0,0,
                                 0,0,0,1,1,
                                 1,1,1,1,1,
                                 1,1,1,1,1,
                                 1,1,1,1,
-                                1,1,1,1,1,1};			       
+                                1,1,1,1,1,1,
+                                1,1,1,1,0,0};			       
 
 
     //input file path and name
