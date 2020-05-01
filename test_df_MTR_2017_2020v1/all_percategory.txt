@@ -61,7 +61,7 @@ eventSelVEleReco        shape           -             -             -           
 eventVetoVEleReco       shape           -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             1.0           1.0           -             1.0           1.0           -             1.0           1.0           1.0           -             -
 MTR_2017_eventSelTEleReco  param  0.0 1
 MTR_2017_eventSelVEleReco  param  0.0 1
-MTR_2017_eventVetoVEleReco  param  0.0 1
+MTR_2017_eventVetoVEleReco  param  0.0 0.0001
 MTR_2017_eventSelVEleIdIso  param  0.0 1
 MTR_2017_tau_veto      param  0.0 1
 MTR_2017_eventVetoVEleIdIso  param  0.0 1
@@ -210,3 +210,4 @@ MTR_2017_QCDwzratioQCDcorrSyst_muR  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_pdf  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_muF  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_muR  param  0.0 1
+nuisance edit freeze MTR_2017_eventVetoVEleReco
