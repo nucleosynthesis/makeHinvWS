@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -11,8 +12,8 @@
 #include "TH1F.h"
 #include "RooDataHist.h"
 #include "RooFormulaVar.h"
-//#include "../..//interface/RooParametricHist.h"
-#include "/afs/cern.ch/user/v/vmilosev/CMSSW_10_2_13/src/HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
+#include "../../interface/RooParametricHist.h"
+//#include "/afs/cern.ch/user/v/vmilosev/CMSSW_10_2_13/src/HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
 #include "RooAddition.h"
 
 enum PROCESS{
@@ -28,7 +29,10 @@ enum PROCESS{
 };
 
 
-int makeWS_percategory(){
+int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
+
+
+    const bool is2017 = year=="2017";
     // As usual, load the combine library to get access to the RooParametricHist
     gSystem->Load("libHiggsAnalysisCombinedLimit.so");
 
@@ -38,11 +42,11 @@ int makeWS_percategory(){
     //To be adjusted to channel !
 
     std::string lChannel = "VBF";
-    std::string lCategory = "MTR_2017_";
+    std::string lCategory = cat+"_"+year+"_";
     std::string lOutFileName = "param_ws_"+lCategory+lChannel+".root";
 
     //define the variable that is fitted
-    RooRealVar lVarFit("mjj_MTR_2017","M_{jj} (GeV)",200,5000);
+    RooRealVar lVarFit(("mjj_"+cat+"_"+year).c_str(),"M_{jj} (GeV)",200,5000);
     std::string lVarLabel = "Mjj";
 
     // Regions
@@ -58,43 +62,49 @@ int makeWS_percategory(){
 			      "DY","EWKZll",
 			      "TOP","VV","QCD"};
 
-    const unsigned nN = 17;
-    std::string lNuis[17] = {"bjet_veto","pileup","tau_veto",
+    const unsigned nN = 20;
+    std::string lNuis[20] = {"bjet_veto","pileup","tau_veto",
 			     "eventVetoVEleIdIso","eventVetoLMuId","eventVetoLMuIso",
 			     "eventSelTEleIdIso","eventSelTMuId","eventSelTMuIso",
       			     "eventSelVEleIdIso","eventSelLMuId","eventSelLMuIso",
                              "fnlo_SF_QCD_corr_EWK_proc", "fnlo_SF_EWK_corr",
                              "fnlo_SF_QCD_corr_QCD_proc_muF","fnlo_SF_QCD_corr_QCD_proc_muR","fnlo_SF_QCD_corr_QCD_proc_pdf",
+                             "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco"
     };
 
     const unsigned nS = 2*nN+1;
-    std::string lSysts[35];
+    std::string lSysts[41];
     for (unsigned iS(0); iS<nS; ++iS){
       if (iS==0) lSysts[iS] = "";
       else lSysts[iS] = (iS-1)%2==0? lNuis[(iS-1)/2]+"Up" : lNuis[(iS-1)/2]+"Down";
       //std::cout << lSysts[iS] << std::endl;
     }
-    const bool isSRsyst[35] = {1,1,1,1,1,
+    const bool isSRsyst[41] = {1,1,1,1,1,
 			       1,1,1,1,1,
 			       1,1,1,0,0,
 			       0,0,0,0,0,
 			       0,0,0,0,0,
                                1,1,1,1,
-                               1,1,1,1,1,1};
-    const bool isCRWsyst[35] = {1,1,1,1,1,
+                               1,1,1,1,1,1,
+                               0,0,0,0,1,1};
+
+    const bool isCRWsyst[41] = {1,1,1,1,1,
 				1,1,0,0,0,
 				0,0,0,1,1,
 				1,1,1,1,0,
 				0,0,0,0,0,
                                 1,1,1,1,
-                                1,1,1,1,1,1};
-    const bool isCRZsyst[35] = {1,1,1,1,1,
+                                1,1,1,1,1,1,
+                                0,0,1,1,0,0};
+
+    const bool isCRZsyst[41] = {1,1,1,1,1,
                                 1,1,0,0,0,
                                 0,0,0,1,1,
                                 1,1,1,1,1,
                                 1,1,1,1,1,
                                 1,1,1,1,
-                                1,1,1,1,1,1};			       
+                                1,1,1,1,1,1,
+                                1,1,1,1,0,0};			       
 
 
     //input file path and name
@@ -102,7 +112,7 @@ int makeWS_percategory(){
     //and one histogram per process with name as in lProcs with shape of the variable that is fitted.
     std::string lInFileName[nR];
     for (unsigned iR(0); iR<nR; ++iR){     
-      lInFileName[iR] = "out_VBF_ana_"+lRegions[iR]+"_2017_vMTR_2017_200109/VBF_shapes.root";
+      lInFileName[iR] = "out_VBF_ana_"+lRegions[iR]+"_"+year+"_v"+cat+"_"+year+"_200109/VBF_shapes.root";
     }
 
     std::string lInFileName_Sam = "WJetsToLNu.root";
@@ -119,8 +129,14 @@ int makeWS_percategory(){
     //values of nuisances
     double WZratioSyst = 1.12;
 
-    double jesWWSyst = 1.02;
+    double jesWWSyst[nT] = {is2017 ? 1.015 : 1.01, 1.01};
+    double jerWWSyst[nT] = {is2017 ? 1.015 : 1.01, 1.01};
+
     double jesZZSyst = 1.01;
+    double jerZZSyst = 1.01;
+
+    double jesWZSyst[nT] = {1.02, 1.01};
+    double jerWZSyst[nT] = {is2017 ? 1.025 : 1.01,is2017 ? 1.015 : 1.01};
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -232,10 +248,22 @@ int makeWS_percategory(){
     RooRealVar *wzratio[nT];
     RooRealVar *jesWW[nT];
     RooRealVar *jesZZ[nT];
-    RooRealVar *wzratioSyst_muR[nT], *wzratioSyst_muF[nT], *wzratioSyst_pdf[nT];
+    RooRealVar *jerWW[nT];
+    RooRealVar *jerZZ[nT];
+    RooRealVar *wzratioSyst_jes[nT], *wzratioSyst_jer[nT], *wzratioSyst_muR[nT], *wzratioSyst_muF[nT], *wzratioSyst_pdf[nT];
     for (unsigned iT(0); iT<nT; ++iT){     
       wzratio[iT] = new RooRealVar(("wzratio"+lType[iT]).c_str(), (lType[iT]+" W/Z ratio nuisance parameter").c_str(),0);
       std::ostringstream lname;
+      lname.str("");
+      lname << lCategory;
+      lname << lType[iT];
+      lname << "wzratioSyst_jes";
+      wzratioSyst_jes[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JES ratio nuisance parameter per bin").c_str(),0);
+      lname.str("");
+      lname << lCategory;
+      lname << lType[iT];
+      lname << "wzratioSyst_jer";
+      wzratioSyst_jer[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JER ratio nuisance parameter per bin").c_str(),0);
       lname.str("");
       lname << lCategory;
       lname << lType[iT];
@@ -255,6 +283,8 @@ int makeWS_percategory(){
  
       jesWW[iT] = new RooRealVar((lCategory+"jesWW"+lType[iT]).c_str(), (lType[iT]+" W/W JES nuisance parameter").c_str(),0);
       jesZZ[iT] = new RooRealVar((lCategory+"jesZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JES nuisance parameter").c_str(),0);
+      jerWW[iT] = new RooRealVar((lCategory+"jerWW"+lType[iT]).c_str(), (lType[iT]+" W/W JER nuisance parameter").c_str(),0);
+      jerZZ[iT] = new RooRealVar((lCategory+"jerZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JER nuisance parameter").c_str(),0);
     }
 
 
@@ -268,7 +298,9 @@ int makeWS_percategory(){
       std::ostringstream lname;
       lname.str("");
       lname << lCategory;
-      lname << "TF_syst_" << lNuis[iN];
+     // changing to match the naming convention used in the datacard
+     // lname << "TF_syst_" << lNuis[iN];
+      lname << "" << lNuis[iN];
       TFsysts[iN] = new RooRealVar(lname.str().c_str(),"CR/SR ratio syst nuisance parameter",0);
     }
 
@@ -377,12 +409,16 @@ int makeWS_percategory(){
 	} else {
 	 lFormula << "*TMath::Power(" << WZratioSyst_muR << ",@0)*TMath::Power(" << WZratioSyst_muF << ",@1)*TMath::Power(" << WZratioSyst_pdf << ",@2)*TMath::Power(" << ratiostat << ",@3)*TMath::Power(" << ratio_EWK_corr_on_Strong_proc << ",@4)";
 	}
+	 //add JES/JER
+	 lFormula << "*TMath::Power(" << jesWZSyst[iT] << ",@5)";
+	 lFormula << "*TMath::Power(" << jerWZSyst[iT] << ",@6)";
 
 	std::cout << " ---- Check stat error " << lType[iT] << " WZratio: " << ratiostat << std::endl;
         RooFormulaVar *TFWZ;
+	//C-AMM: why the if-else loop below ? Everything is given with [iT] ...
         if (iT != 0){	
 	  std::cout << " Ok -> iT=1 "<< lname.str().c_str() << ", " << lFormula.str().c_str() << std::endl;
-          RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]));
+          RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(wzratioSyst_jes[iT]), *(wzratioSyst_jer[iT]));
           variables.Print();
           TFWZ = new RooFormulaVar(lname.str().c_str(),"Transfer factor W/Z",lFormula.str().c_str(),variables );
         
@@ -390,7 +426,7 @@ int makeWS_percategory(){
         }
         else{
 	  std::cout << " Ok -> iT=0 " << lname.str().c_str() << ", " << lFormula.str().c_str() << std::endl;
-	  RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]));
+	  RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(wzratioSyst_jes[iT]), *(wzratioSyst_jer[iT]));
 	  variables.Print();
           TFWZ = new RooFormulaVar(lname.str().c_str(),"Transfer factor W/Z",lFormula.str().c_str(),variables );
           //std::cout<<RooArgList( *(wzratioSyst_muR[iB]), *(wzratioSyst_muF[iB]), *(wzratioSyst_pdf[iB]),*(wzratiostat[iT][iB]))<<std::endl;
@@ -435,15 +471,22 @@ int makeWS_percategory(){
 	  lFormula.str("");
 	  lFormula << ratio;
 	  lFormula << "*TMath::Power(";
-	  if (iR<3) lFormula << jesWWSyst;
+	  if (iR<3) lFormula << jesWWSyst[iT];
 	  else lFormula << jesZZSyst;
-	  lFormula << ",@0)*TMath::Power(" << ratiostat << ",@1)";
+	  lFormula << ",@0)";
+	  lFormula << "*TMath::Power(";
+	  if (iR<3) lFormula << jerWWSyst[iT];
+	  else lFormula << jerZZSyst;
+	  lFormula << ",@1)";
+	  lFormula << "*TMath::Power(" << ratiostat << ",@2)";
 
 	  RooArgList nuisances;
 	  nuisances.add(iR<3? *(jesWW[iT]) : *(jesZZ[iT]));
+	  nuisances.add(iR<3? *(jerWW[iT]) : *(jerZZ[iT]));
 	  nuisances.add(*(TFstat[iT][iB][iR-1]));
 	  for (unsigned iN(0); iN < nN; ++iN){
-	    unsigned iSyst = 2+iN;
+	    // 3 = JES+JER+stat: change if adding syst beforehand !!
+	    unsigned iSyst = 3+iN;
 	    double ratiovar[2];
 	    double ratiosyst[2];
 	    //get up and down variations

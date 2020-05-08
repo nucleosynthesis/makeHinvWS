@@ -210,4 +210,12 @@ MTR_2017_QCDwzratioQCDcorrSyst_muR  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_pdf  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_muF  param  0.0 1
 MTR_2017_EWKwzratioQCDcorrSyst_muR  param  0.0 1
-nuisance edit freeze MTR_2017_eventVetoVEleReco
+MTR_2017_QCDwzratioSyst_jes  param  0.0 1
+MTR_2017_EWKwzratioSyst_jes  param  0.0 1
+MTR_2017_QCDwzratioSyst_jer  param  0.0 1
+MTR_2017_EWKwzratioSyst_jer  param  0.0 1
+MTR_2017_jerZZEWK param  0.0 1
+MTR_2017_jerZZQCD param  0.0 1                                                                                                                       
+MTR_2017_jerWWEWK param  0.0 1
+MTR_2017_jerWWQCD param  0.0 1
+#nuisance edit freeze MTR_2017_eventVetoVEleReco
