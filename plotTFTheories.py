@@ -6,7 +6,7 @@ ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(1)
 
 
-BASE_DIRECTORY="fast_datacard_input_200127"
+BASE_DIRECTORY="./"
 
 """
 tf.ZProc = "mumu"

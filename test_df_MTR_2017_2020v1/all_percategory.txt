@@ -61,7 +61,7 @@ eventSelVEleReco        shape           -             -             -           
 eventVetoVEleReco       shape           -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             -             1.0           1.0           -             1.0           1.0           -             1.0           1.0           1.0           -             -
 MTR_2017_eventSelTEleReco  param  0.0 1
 MTR_2017_eventSelVEleReco  param  0.0 1
-MTR_2017_eventVetoVEleReco  param  0.0 0.0001
+MTR_2017_eventVetoVEleReco  param  0.0 1
 MTR_2017_eventSelVEleIdIso  param  0.0 1
 MTR_2017_tau_veto      param  0.0 1
 MTR_2017_eventVetoVEleIdIso  param  0.0 1

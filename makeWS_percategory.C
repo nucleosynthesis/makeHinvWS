@@ -106,7 +106,29 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
                                 1,1,1,1,1,1,
                                 1,1,1,1,0,0};			       
 
-
+    //possibility to override nuisances with hardcoded values
+    double hardCodeNuisance[nR][nS];
+    
+    for (unsigned iR(0); iR<nR; ++iR){     
+      for (unsigned iS(0); iS < nS; ++iS){
+	hardCodeNuisance[iR][iS] = -1.;
+      }
+    }
+    //@FIXME correct lepton IDISO for now
+    for (unsigned iR(1); iR<nR; ++iR){     
+      //VetoVEleIdIso
+      //just for W regions
+      if (iR<3) hardCodeNuisance[iR][7] = 0.97;
+      if (iR<3) hardCodeNuisance[iR][8] = 1.03;
+      //skip muon regions
+      if (iR==2 || iR==4) continue;
+      //SelTEleIdIso
+      hardCodeNuisance[iR][13] = iR==1? 1.03 : 1.06;
+      hardCodeNuisance[iR][14] = iR==1? 0.97 : 0.94;
+      //SelVEleIdIso
+      hardCodeNuisance[iR][19] = iR==1? 1. : 1.02;
+      hardCodeNuisance[iR][20] = iR==1? 1. : 0.98;
+    }
     //input file path and name
     //input file is expected to contain one directory per region with names as in lRegions,
     //and one histogram per process with name as in lProcs with shape of the variable that is fitted.
@@ -494,7 +516,8 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	      unsigned iS = 2*iN+1+iV;
 	      ratiovar[iV] = iR<3 ? histos[iR][vproc[iT][iR]][iS]->GetBinContent(iB) / histos[0][vproc[iT][iR]][iS]->GetBinContent(iB):
 		histos[iR][vproc[iT][iR]][iS]->GetBinContent(iB) / histos[0][vproc[iT][0]][iS]->GetBinContent(iB);
-	      ratiosyst[iV] = 1+(ratiovar[iV]-ratio)/ratio;
+	      if (hardCodeNuisance[iR][iS]<0) ratiosyst[iV] = 1+(ratiovar[iV]-ratio)/ratio;
+	      else ratiosyst[iV] = hardCodeNuisance[iR][iS];
 	      if (ratiosyst[iV] < 0){
 		std::cout << " -- ERROR in systematics variations! For process " << lProcs[vproc[iT][iR]] << " region " << lRegions[iR] << " syst " << lSysts[iS] << " bin " << iB << ": ratio = " << ratio << " ratiovar = " << ratiovar[iV] << std::endl;
 		return 1;
