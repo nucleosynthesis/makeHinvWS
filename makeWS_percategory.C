@@ -42,8 +42,9 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     //To be adjusted to channel !
 
     std::string lChannel = "VBF";
-    std::string lCategory = cat+"_"+year+"_";
-    std::string lOutFileName = "param_ws_"+lCategory+lChannel+".root";
+    std::string lCategory = cat+"_";
+    std::string lYear = year+"_";
+    std::string lOutFileName = "param_ws_"+lCategory+lYear+lChannel+".root";
 
     //define the variable that is fitted
     RooRealVar lVarFit(("mjj_"+cat+"_"+year).c_str(),"M_{jj} (GeV)",200,5000);
@@ -70,6 +71,23 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
                              "fnlo_SF_QCD_corr_EWK_proc", "fnlo_SF_EWK_corr",
                              "fnlo_SF_QCD_corr_QCD_proc_muF","fnlo_SF_QCD_corr_QCD_proc_muR","fnlo_SF_QCD_corr_QCD_proc_pdf",
                              "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco"
+    };
+
+    const bool corrCat[20] = {1,1,1,
+			      1,1,1,
+			      1,1,1,
+			      1,1,1,
+			      0,0,
+			      0,0,0,
+			      1,1,1
+    };
+    const bool corrYear[20] = {1,1,0,
+			       1,1,1,
+			       1,1,1,
+			       1,1,1,
+			       1,1,
+			       1,1,1,
+			       1,1,1
     };
 
     const unsigned nS = 2*nN+1;
@@ -159,6 +177,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 
     double jesWZSyst[nT] = {1.02, 1.01};
     double jerWZSyst[nT] = {is2017 ? 1.025 : 1.01,is2017 ? 1.015 : 1.01};
+
+    double eleRecoVetoWZ = 1.01;
+    double eleIdIsoVetoWZ = 1.03;
+    double muIdVetoWZ = 1.005;
+    double muIsoVetoWZ = 1.001;
+    double tauVetoWZ = 1.01;
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -268,24 +292,26 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     // In the signal region, W and Z are tied together by their ratio from MC + theory uncertainty.
     // SR/CR remaining non-cancellations from JES uncertainties.
     RooRealVar *wzratio[nT];
-    RooRealVar *jesWW[nT];
-    RooRealVar *jesZZ[nT];
-    RooRealVar *jerWW[nT];
-    RooRealVar *jerZZ[nT];
-    RooRealVar *wzratioSyst_jes[nT], *wzratioSyst_jer[nT], *wzratioSyst_muR[nT], *wzratioSyst_muF[nT], *wzratioSyst_pdf[nT];
+    //JES fully correlated across years, JER fully uncorrelated
+    RooRealVar *jes = new RooRealVar("CMS_scale_j", "JES nuisance parameter", 0);
+    RooRealVar *jer = new RooRealVar(("CMS_res_j_"+year).c_str(), "JER nuisance parameter", 0);
+    //RooRealVar *jesZZ[nT];
+    //RooRealVar *jerZZ[nT];
+    //RooRealVar *wzratioSyst_jes[nT], *wzratioSyst_jer[nT];
+    RooRealVar *wzratioSyst_muR[nT], *wzratioSyst_muF[nT], *wzratioSyst_pdf[nT];
     for (unsigned iT(0); iT<nT; ++iT){     
       wzratio[iT] = new RooRealVar(("wzratio"+lType[iT]).c_str(), (lType[iT]+" W/Z ratio nuisance parameter").c_str(),0);
       std::ostringstream lname;
-      lname.str("");
-      lname << lCategory;
-      lname << lType[iT];
-      lname << "wzratioSyst_jes";
-      wzratioSyst_jes[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JES ratio nuisance parameter per bin").c_str(),0);
-      lname.str("");
-      lname << lCategory;
-      lname << lType[iT];
-      lname << "wzratioSyst_jer";
-      wzratioSyst_jer[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JER ratio nuisance parameter per bin").c_str(),0);
+      //lname.str("");
+      //lname << lCategory << lYear;
+      //lname << lType[iT];
+      //lname << "wzratioSyst_jes";
+      //wzratioSyst_jes[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JES ratio nuisance parameter per bin").c_str(),0);
+      //lname.str("");
+      //lname << lCategory << lYear;
+      //lname << lType[iT];
+      //lname << "wzratioSyst_jer";
+      //wzratioSyst_jer[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z JER ratio nuisance parameter per bin").c_str(),0);
       lname.str("");
       lname << lCategory;
       lname << lType[iT];
@@ -303,10 +329,9 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       wzratioSyst_pdf[iT] = new RooRealVar(lname.str().c_str(), (lType[iT]+" W/Z Syst pdf ratio nuisance parameter per bin").c_str(),0);
     
  
-      jesWW[iT] = new RooRealVar((lCategory+"jesWW"+lType[iT]).c_str(), (lType[iT]+" W/W JES nuisance parameter").c_str(),0);
-      jesZZ[iT] = new RooRealVar((lCategory+"jesZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JES nuisance parameter").c_str(),0);
-      jerWW[iT] = new RooRealVar((lCategory+"jerWW"+lType[iT]).c_str(), (lType[iT]+" W/W JER nuisance parameter").c_str(),0);
-      jerZZ[iT] = new RooRealVar((lCategory+"jerZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JER nuisance parameter").c_str(),0);
+      //jesZZ[iT] = new RooRealVar((lCategory+lYear+"jesZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JES nuisance parameter").c_str(),0);
+      //jerWW[iT] = new RooRealVar((lCategory+lYear+"jerWW"+lType[iT]).c_str(), (lType[iT]+" W/W JER nuisance parameter").c_str(),0);
+      //jerZZ[iT] = new RooRealVar((lCategory+lYear+"jerZZ"+lType[iT]).c_str(), (lType[iT]+" Z/Z JER nuisance parameter").c_str(),0);
     }
 
 
@@ -319,7 +344,8 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     for (unsigned iN(0); iN < nN; ++iN){
       std::ostringstream lname;
       lname.str("");
-      lname << lCategory;
+      if (!corrCat[iN]) lname << lCategory;
+      if (!corrYear[iN]) lname << lYear;
      // changing to match the naming convention used in the datacard
      // lname << "TF_syst_" << lNuis[iN];
       lname << "" << lNuis[iN];
@@ -339,7 +365,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	std::cout << " --- Processing type " << lType[iT] << std::endl;
 
 	lname.str("");
-        lname << lCategory;
+        lname << lCategory << lYear;
 	lname << lType[iT] << "Z_SR_bin" << iB;
 	RooRealVar binParZ(lname.str().c_str(),(lType[iT]+" Z+jets yield in signal region, per bin").c_str(),histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB),0,10*histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB));
 
@@ -351,11 +377,11 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  
 	  //program link between QCD and EWK yields in SR
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << "ewkqcdratio_stat_bin" << iB;
 	  ewkqcdratiostat[iB] = new RooRealVar(lname.str().c_str()," EWK/QCD ratio stat nuisance parameter",0);
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << "TF_EWKQCDSR_bin" << iB;
 	  std::ostringstream lFormula;
 	  double ratio = histos[0][PROCESS::EWKZnunu][0]->GetBinContent(iB) / histos[0][PROCESS::QCDZnunu][0]->GetBinContent(iB); 
@@ -366,7 +392,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  RooFormulaVar TFEWKQCD(lname.str().c_str(),"Transfer factor EWK/QCD Z",lFormula.str().c_str(),RooArgList(*(ewkqcdratiostat[iB])) );
 	  wspace.import(TFEWKQCD,RooFit::RecycleConflictNodes());
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << "EWKQCD_SR_bin" << iB;
 	  EWKQCDbin = new RooFormulaVar(lname.str().c_str(),"EWK Z+jets yield in signal regions from QCD Z yield, per bin","@0*@1",RooArgList(TFEWKQCD,binParZ));
 	  wspace.import((*EWKQCDbin),RooFit::RecycleConflictNodes());
@@ -379,7 +405,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	//lname << "EWKQCD_SR_bin" << iB;
 	//RooFormulaVar EWKQCDbin = *wspace.function(lname.str().c_str());
 	lname.str("");
-        lname << lCategory;
+        lname << lCategory << lYear;
 	lname << lType[iT] << "wzratio_stat_bin" << iB;
 	wzratiostat[iT][iB] = new RooRealVar(lname.str().c_str(),"W/Z ratio stat nuisance parameter",0);
         lname.str("");
@@ -389,7 +415,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
          
 
 	lname.str("");
-        lname << lCategory;
+        lname << lCategory << lYear;
 	lname << lType[iT] << "TF_WZSR_bin" << iB;
 	std::ostringstream lFormula;
 	lFormula.str("");
@@ -434,13 +460,21 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	 //add JES/JER
 	 lFormula << "*TMath::Power(" << jesWZSyst[iT] << ",@5)";
 	 lFormula << "*TMath::Power(" << jerWZSyst[iT] << ",@6)";
+	 //add also lepton veto uncertainties
+	 //lFormula << "*TMath::Power(" << eleRecoVetoWZ << ",@7)";
+	 lFormula << "*TMath::Power(" << eleIdIsoVetoWZ << ",@7)";
+	 //lFormula << "*TMath::Power(" << muIdVetoWZ << ",@9)";
+	 //lFormula << "*TMath::Power(" << muIsoVetoWZ << ",@10)";
+	 lFormula << "*TMath::Power(" << tauVetoWZ << ",@8)";
+
 
 	std::cout << " ---- Check stat error " << lType[iT] << " WZratio: " << ratiostat << std::endl;
         RooFormulaVar *TFWZ;
 	//C-AMM: why the if-else loop below ? Everything is given with [iT] ...
         if (iT != 0){	
 	  std::cout << " Ok -> iT=1 "<< lname.str().c_str() << ", " << lFormula.str().c_str() << std::endl;
-          RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(wzratioSyst_jes[iT]), *(wzratioSyst_jer[iT]));
+          //RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(wzratioSyst_jes[iT]), *(wzratioSyst_jer[iT]));
+          RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(jes), *(jer), *(TFsysts[3]), *(TFsysts[2]));
           variables.Print();
           TFWZ = new RooFormulaVar(lname.str().c_str(),"Transfer factor W/Z",lFormula.str().c_str(),variables );
         
@@ -448,7 +482,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
         }
         else{
 	  std::cout << " Ok -> iT=0 " << lname.str().c_str() << ", " << lFormula.str().c_str() << std::endl;
-	  RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(wzratioSyst_jes[iT]), *(wzratioSyst_jer[iT]));
+	  RooArgList variables( *(wzratioSyst_muR[iT]), *(wzratioSyst_muF[iT]), *(wzratioSyst_pdf[iT]),*(wzratiostat[iT][iB]), *(wzratioEWK_on_strong[iT][iB]), *(jes), *(jer), *(TFsysts[3]), *(TFsysts[2]));
 	  variables.Print();
           TFWZ = new RooFormulaVar(lname.str().c_str(),"Transfer factor W/Z",lFormula.str().c_str(),variables );
           //std::cout<<RooArgList( *(wzratioSyst_muR[iB]), *(wzratioSyst_muF[iB]), *(wzratioSyst_pdf[iB]),*(wzratiostat[iT][iB]))<<std::endl;
@@ -457,7 +491,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
         }
         std::cout<<"Proslo ok"<<std::endl;
         lname.str("");
-        lname << lCategory;
+        lname << lCategory << lYear;
         lname << lType[iT] << "WZ_SR_bin" << iB;
         RooFormulaVar WZbin(lname.str().c_str(),(lType[iT]+" W+jets yield in signal regions from Z yield, per bin").c_str(),"@0*@1",iT==0?RooArgList(*TFWZ,binParZ):RooArgList(*TFWZ,*(EWKQCDbin)));
         wspace.import(WZbin,RooFit::RecycleConflictNodes());
@@ -471,7 +505,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  std::cout << " ---- Doing control regions: " << lRegions[iR] << std::endl;
 	  
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << lType[iT] << "TF_" << lRegions[iR] << "_stat_bin" << iB;
 	  TFstat[iT][iB][iR-1] = new RooRealVar(lname.str().c_str(),"CR/SR ratio stat nuisance parameter",0);
 	  ratio = 0;
@@ -503,8 +537,10 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  lFormula << "*TMath::Power(" << ratiostat << ",@2)";
 
 	  RooArgList nuisances;
-	  nuisances.add(iR<3? *(jesWW[iT]) : *(jesZZ[iT]));
-	  nuisances.add(iR<3? *(jerWW[iT]) : *(jerZZ[iT]));
+	  //nuisances.add(iR<3? *(jesWW[iT]) : *(jesZZ[iT]));
+	  //nuisances.add(iR<3? *(jerWW[iT]) : *(jerZZ[iT]));
+	  nuisances.add(*(jes));
+	  nuisances.add(*(jer));
 	  nuisances.add(*(TFstat[iT][iB][iR-1]));
 	  for (unsigned iN(0); iN < nN; ++iN){
 	    // 3 = JES+JER+stat: change if adding syst beforehand !!
@@ -537,12 +573,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 
 
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << lType[iT] << "TF_" << lRegions[iR] << "_bin" << iB;
 	  RooFormulaVar TF(lname.str().c_str(),"Transfer factor CR/SR",lFormula.str().c_str(),nuisances);
 	  wspace.import(TF,RooFit::RecycleConflictNodes());
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << lType[iT] << "V_" << lRegions[iR] << "_bin" << iB;
 	  RooFormulaVar CRbin(lname.str().c_str(),(lType[iT]+" V+jets yield in control regions, per bin").c_str(),"@0*@1",iR<3?RooArgList(TF,WZbin):iT==0?RooArgList(TF,binParZ):RooArgList(TF,*(EWKQCDbin)));
 	  wspace.import(CRbin,RooFit::RecycleConflictNodes());
@@ -564,10 +600,10 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       for (unsigned iB(0); iB<nB; ++iB){
 	std::ostringstream lname;
 	if (iT==0){
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << lType[iT] << "Z_SR_bin" << iB+1;
 	} else {
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << "EWKQCD_SR_bin" << iB+1;
 	}
 	if ( (iT==0 && !wspace.var(lname.str().c_str())) ||
@@ -579,7 +615,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	if (iT==0) Z_SR_bins[iT].add(*wspace.var(lname.str().c_str()));
 	else Z_SR_bins[iT].add(*wspace.function(lname.str().c_str()));
 	lname.str("");
-        lname << lCategory;
+        lname << lCategory << lYear;
 	lname << lType[iT] << "WZ_SR_bin" << iB+1;
 	if (!wspace.function(lname.str().c_str())) {
 	  std::cout << "Error for " << lType[iT] << " W bin " << iB << " " << lname.str() << std::endl;
@@ -588,7 +624,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	W_SR_bins[iT].add(*wspace.function(lname.str().c_str()));
 	for (unsigned iR(1); iR<nR; ++iR){
 	  lname.str("");
-          lname << lCategory;
+          lname << lCategory << lYear;
 	  lname << lType[iT] << "V_" << lRegions[iR] << "_bin" << iB+1;
 	  if (!wspace.function(lname.str().c_str())) {
 	    std::cout << "Error for  " << lType[iT] << " Z bin " << iB << " region " << lRegions[iR] << " " << lname.str() << std::endl;
@@ -626,7 +662,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     
       for (unsigned iR(1); iR<nR; ++iR){
 	std::ostringstream lname;
-        lname << lCategory;
+        lname << lCategory << lYear;
 	lname << lType[iT] << "V_" << lRegions[iR];
 	RooParametricHist p_CRV(lname.str().c_str(), "Background PDF in control region",lVarFit,V_CR_bins[iT][iR-1],dummyHist);
 	lname << "_norm";
