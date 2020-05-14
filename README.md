@@ -16,7 +16,9 @@ Combine workspace creator for the VBF H(Inv) analysis.
 Following through the analysis steps (fast_carpenter and fast_datacard), in the same directory as ```fast_datacard``` output:
 
 ```
-root -l makeWS_percategory.C
+root
+root> .L ../makeWS_percategory.C++
+root> makeWS_percategory("2017","MTR")
 . mkresh.sh
 ```
 

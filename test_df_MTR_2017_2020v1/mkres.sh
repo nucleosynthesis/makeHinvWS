@@ -4,7 +4,7 @@ DATE=$(date +"%m-%d-%y")
 mkdir -p  ./vbfinv/2017/$DATE
 
 text2workspace.py all_percategory.txt --channel-masks
-combine all_percategory.root --run blind 
+combine all_percategory.root --run blind | tee limit.log
 
 combine all_percategory.root -M FitDiagnostics  --saveShapes --saveWithUncertainties --setParameters mask_SR=1 --plots  --saveNormalizations
 
