@@ -137,7 +137,7 @@ VTR_QCDwzratioQCDcorrSyst_muR  param  0.0 1
 VTR_EWKwzratioQCDcorrSyst_pdf  param  0.0 1
 VTR_EWKwzratioQCDcorrSyst_muF  param  0.0 1
 VTR_EWKwzratioQCDcorrSyst_muR  param  0.0 1
-CMS_scale_j           param  0.0 1
+CMS_VBF_scale_j           param  0.0 1
 CMS_res_j_2017        param  0.0 1
 eventSelTEleReco  param  0.0 1
 eventSelVEleReco  param  0.0 1
