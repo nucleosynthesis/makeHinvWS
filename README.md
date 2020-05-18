@@ -33,7 +33,7 @@ cd -
 ## Running fast_datacard step (from a clean shell) - example for MTR 2017
 
 ```
-git clone 
+git clone git@github.com:vukasinmilosevic/makeHinvWS.git
 cd makeHinvWS/test_df_MTR_2017_2020v1
 . run_fast_datacard.sh
 ```
