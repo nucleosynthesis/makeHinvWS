@@ -15,8 +15,6 @@ Combine workspace creator for the VBF H(Inv) analysis.
 ## Setting up fast_datacard (creating the env - only once)
 
 ```
-fast_datacard instructions
-
 source /afs/cern.ch/user/$U/$USER/miniconda2/etc/profile.d/conda.sh
 conda create -n test_datacard_new
 conda activate test_datacard_new
