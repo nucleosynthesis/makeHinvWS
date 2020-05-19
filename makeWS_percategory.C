@@ -175,8 +175,8 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     double jesZZSyst = 1.01;
     double jerZZSyst = 1.01;
 
-    double jesWZSyst[nT] = {1.02, 1.01};
-    double jerWZSyst[nT] = {is2017 ? 1.025 : 1.01,is2017 ? 1.015 : 1.01};
+    double jesWZSyst[nT] = {1/1.02, 1/1.01};
+    double jerWZSyst[nT] = {is2017 ? 1/1.025 : 1/1.01,is2017 ? 1/1.015 : 1/1.01};
 
     double eleRecoVetoWZ = 1.01;
     double eleIdIsoVetoWZ = 1.03;
