@@ -133,19 +133,22 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       }
     }
     //@FIXME correct lepton IDISO for now
+    //hardCodeNuisance[0][7] = 0.97;
+    //hardCodeNuisance[0][8] = 1.03;
     for (unsigned iR(1); iR<nR; ++iR){     
       //VetoVEleIdIso
       //just for W regions
-      if (iR<3) hardCodeNuisance[iR][7] = 0.97;
-      if (iR<3) hardCodeNuisance[iR][8] = 1.03;
+      //inverted for veto, but acting on SR = denominator -> inverted twice...
+      if (iR<3) hardCodeNuisance[iR][7] = 1.03;
+      if (iR<3) hardCodeNuisance[iR][8] = 0.97;
       //skip muon regions
       if (iR==2 || iR==4) continue;
       //SelTEleIdIso
       hardCodeNuisance[iR][13] = iR==1? 1.03 : 1.06;
       hardCodeNuisance[iR][14] = iR==1? 0.97 : 0.94;
-      //SelVEleIdIso
-      hardCodeNuisance[iR][19] = iR==1? 1. : 1.02;
-      hardCodeNuisance[iR][20] = iR==1? 1. : 0.98;
+      //SelVEleIdIso // as counted double for tight already for Zll, just ignore this one...
+      hardCodeNuisance[iR][19] = iR==1? 1. : 1.;
+      hardCodeNuisance[iR][20] = iR==1? 1. : 1.;
     }
     //input file path and name
     //input file is expected to contain one directory per region with names as in lRegions,
@@ -178,11 +181,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     double jesWZSyst[nT] = {1/1.02, 1/1.01};
     double jerWZSyst[nT] = {is2017 ? 1/1.025 : 1/1.01,is2017 ? 1/1.015 : 1/1.01};
 
-    double eleRecoVetoWZ = 1.01;
-    double eleIdIsoVetoWZ = 1.03;
-    double muIdVetoWZ = 1.005;
-    double muIsoVetoWZ = 1.001;
-    double tauVetoWZ = 1.01;
+    //inverted because vetos...acting on numerator W.
+    double eleRecoVetoWZ = 1/1.01;
+    double eleIdIsoVetoWZ = 1/1.03;
+    double muIdVetoWZ = 1/1.005;
+    double muIsoVetoWZ = 1/1.001;
+    double tauVetoWZ = 1/1.01;
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
