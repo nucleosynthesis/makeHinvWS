@@ -5,7 +5,7 @@ Combine workspace creator for the VBF H(Inv) analysis.
 
 ```makeWS.C``` represents the original version of the code.
 
-```all_percategory.txt``` represents the currently used datacard
+```all_percategory.txt``` represents the original datacard
 
 ```plot*.py``` are plotting macros used to prepare the TF plots.
 
@@ -28,23 +28,26 @@ cd ..
 export PATH=~/.local/bin:$PATH
 cd -
 ```
-## Running fast_datacard step (from a clean shell) - example for MTR 2017
+## Running fast_datacard step (from a clean shell but under the fast-dc virtual environment) - example for all categories:
 
 ```
 git clone git@github.com:vukasinmilosevic/makeHinvWS.git
-cd makeHinvWS/test_df_MTR_2017_2020v1
+cd makeHinvWS/
+## copy outputs of previous steps, normally located at IC under /vols/cms/VBFHinv/
 . run_fast_datacard.sh
 ```
 
 
-## Extracting the limit
+## Making the workspaces
 Following through the analysis steps (fast_carpenter and fast_datacard), in the same directory as ```fast_datacard``` output (reqires setting up combine):
 
 ```
+cd test_df_MTR_2017_2020v1/
 root
 root> .L ../makeWS_percategory.C++
 root> makeWS_percategory("2017","MTR")
-. mkresh.sh
+## Limit steps and datacards now moved to different gitlab area: https://gitlab.cern.ch/cms-hcg/cadi/hig-20-003
+##. mkresh.sh
 ```
 
 
