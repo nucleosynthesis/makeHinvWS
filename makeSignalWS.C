@@ -81,11 +81,11 @@ void makeSignalWS(std::string year="2017", std::string cat="MTR"){
        for (unsigned iS(0); iS < nN; ++iS){
          
 	 TH1F* ThistSU = (TH1F*)finput->Get(Form("%s/%s_%sUp",lRegions.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-         RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_"+lSysts[iS]+"Up").c_str(),"Signal proces",vars,ThistSU);
+         RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_CMS_scale_j_"+lSysts[iS]+"Up").c_str(),"Signal proces",vars,ThistSU);
          wspace.import(*histSU);	    
 
          TH1F* ThistSD = (TH1F*)finput->Get(Form("%s/%s_%sDown",lRegions.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-         RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_"+lSysts[iS]+"Down").c_str(),"Signal proces",vars,ThistSD);
+         RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_CMS_scale_j_"+lSysts[iS]+"Down").c_str(),"Signal proces",vars,ThistSD);
          wspace.import(*histSD);	     
 
        }
