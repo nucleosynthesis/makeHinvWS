@@ -12,8 +12,8 @@
 #include "TH1F.h"
 #include "RooDataHist.h"
 #include "RooFormulaVar.h"
-#include "../../interface/RooParametricHist.h"
-//#include "../HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
+//#include "../../interface/RooParametricHist.h"
+#include "../HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
 //#include "/afs/cern.ch/user/v/vmilosev/CMSSW_10_2_13/src/HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
 #include "RooAddition.h"
 
