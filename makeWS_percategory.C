@@ -12,7 +12,8 @@
 #include "TH1F.h"
 #include "RooDataHist.h"
 #include "RooFormulaVar.h"
-#include "../../interface/RooParametricHist.h"
+//#include "../../interface/RooParametricHist.h"
+#include "../HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
 //#include "/afs/cern.ch/user/v/vmilosev/CMSSW_10_2_13/src/HiggsAnalysis/CombinedLimit/interface/RooParametricHist.h"
 #include "RooAddition.h"
 
@@ -229,7 +230,9 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     for (unsigned iR(0); iR<nR; ++iR){
       
       finput[iR] = TFile::Open(lInFileName[iR].c_str());
-      finput[iR]->cd(lRegions[iR].c_str());
+
+      if ( lRegions[iR] != "SR" ) finput[iR]->cd((lRegions[iR]+lChannel).c_str());
+      else finput[iR]->cd(lRegions[iR].c_str());
       
       for (unsigned iP(0); iP<nP; ++iP){
 	for (unsigned iS(0); iS < nS; ++iS){
