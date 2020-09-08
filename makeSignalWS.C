@@ -110,8 +110,8 @@ void makeSignalWS(std::string year="2017", std::string cat="MTR"){
 		hSDownnew->SetBinContent(b,yv*hSDown->GetBinContent(hSDown->FindBin(xv)));
 	  }
          
-	 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_"+lJes[iJ]+"Up").c_str(),"Signal proces",vars,hSUpnew);
-         RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_"+lJes[iJ]+"Down").c_str(),"Signal proces",vars,hSDownnew);
+	 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_CMS_scale_j_"+lJes[iJ]+"Up").c_str(),"Signal proces",vars,hSUpnew);
+         RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions+"_CMS_scale_j_"+lJes[iJ]+"Down").c_str(),"Signal proces",vars,hSDownnew);
 	 wspace.import(*histSU);
 	 wspace.import(*histSD);
 
