@@ -300,7 +300,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     // SR/CR remaining non-cancellations from JES uncertainties.
     RooRealVar *wzratio[nT];
     //JES fully correlated across years, JER fully uncorrelated
-    RooRealVar *jes = new RooRealVar("CMS_VBF_scale_j", "JES nuisance parameter", 0);
+    RooRealVar *jes = new RooRealVar("CMS_scale_j_jesRelativeBal", "JES nuisance parameter", 0);
     RooRealVar *jer = new RooRealVar(("CMS_res_j_"+year).c_str(), "JER nuisance parameter", 0);
     //RooRealVar *jesZZ[nT];
     //RooRealVar *jerZZ[nT];
