@@ -47,8 +47,8 @@ void makeSignalWS(std::string year="2017", std::string cat="MTR"){
     TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs.root");
 
     const unsigned nP = 2;
-    std::string lProcs[nP] = {"VBFHtoInv","GluGluHtoInv"};
-
+    std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv"};
+    std::string lJESLabel[nP] = {"VBF"	    ,"ZJetsToNuNu"};  // for now, use the Z->vv sample calculation for ggH
 
     const unsigned nN = 7;
     std::string lSysts[nN] = {"bjet_veto","pileup","tau_veto",
@@ -95,8 +95,8 @@ void makeSignalWS(std::string year="2017", std::string cat="MTR"){
        for (unsigned iJ(0); iJ < nJ; ++iJ){
 
 	
-	  TH1F *hSUp   = (TH1F*)finputJES->Get(Form("VBF%s_%sUp_smoothed",year.c_str(),lJes[iJ].c_str()));
-	  TH1F *hSDown = (TH1F*)finputJES->Get(Form("VBF%s_%sDown_smoothed",year.c_str(),lJes[iJ].c_str()));
+	  TH1F *hSUp   = (TH1F*)finputJES->Get(Form("%s%s_%sUp_smoothed",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
+	  TH1F *hSDown = (TH1F*)finputJES->Get(Form("%s%s_%sDown_smoothed",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
 
 	  TH1F *hSUpnew = (TH1F*)Thist->Clone(); hSUpnew->SetName(Form("%s/%s_%sUp",lRegions.c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
 	  TH1F *hSDownnew = (TH1F*)Thist->Clone(); hSDownnew->SetName(Form("%s/%s_%sDown",lRegions.c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
