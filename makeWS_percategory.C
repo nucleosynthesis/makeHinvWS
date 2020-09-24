@@ -436,7 +436,13 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
         double WZratioSyst_muF = histos[0][PROCESS::QCDW][29]->GetBinContent(iB);
         double WZratioSyst_muR = histos[0][PROCESS::QCDW][31]->GetBinContent(iB);
         double WZratioSyst_pdf = histos[0][PROCESS::QCDW][33]->GetBinContent(iB);
-
+	// Fix a small issue in the last bin of the W/Z ratio for the renorm scale
+	// For some reason the last bin is underestimated in mjj, so we use the previous one
+	if ( iB == nB ) {
+		WZratioSyst_nom = histos[0][PROCESS::QCDW][0]->GetBinContent(iB-1);
+                WZratioSyst_muF = histos[0][PROCESS::QCDW][29]->GetBinContent(iB-1);
+		WZratioSyst_muR = histos[0][PROCESS::QCDW][31]->GetBinContent(iB-1);
+	}
        
         WZratioSyst_muF = 1.0*WZratioSyst_muF/WZratioSyst_nom;
         WZratioSyst_muR = 1.0*WZratioSyst_muR/WZratioSyst_nom;
