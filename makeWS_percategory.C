@@ -557,9 +557,10 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  nuisances.add(*(jes));
 	  nuisances.add(*(jer));
 	  nuisances.add(*(TFstat[iT][iB][iR-1]));
+	  unsigned iSyst = 3;
 	  for (unsigned iN(0); iN < nN; ++iN){
 	    // 3 = JES+JER+stat: change if adding syst beforehand !!
-	    unsigned iSyst = 3+iN;
+	    //unsigned iSyst = 3+iN;
 	    double ratiovar[2];
 	    double ratiosyst[2];
 	    //get up and down variations
@@ -582,8 +583,16 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	      std::cout << " -- INFO: down variations is actually giving larger ratio...." << lProcs[vproc[iT][iR]] << " region " << lRegions[iR] << " syst " << lNuis[iN] << " bin " << iB << ": ratio = " << ratio << " ratiovar = " << ratiovar[1] << std::endl;
 	    }
 	    //take sign of @i to decide up / down...
-	    lFormula << "*( (@" << iSyst << ">=0)*TMath::Power(" << ratiosyst[0] << ",@" << iSyst << ")+(@" << iSyst << "<0)*TMath::Power(" << 1./ratiosyst[1] << ",@" << iSyst << "))";
+	    if (fabs(ratiosyst[0]-1) < 0.001 and fabs(1- 1./ratiosyst[1]) < 0.001) { 
+	      continue;
+	    }
+	    if fabs(ratiosyst[0]-1./ratiosyst[1]) > 0.001 { 
+		    lFormula << "*( (@" << iSyst << ">=0)*TMath::Power(" << ratiosyst[0] << ",@" << iSyst << ")+(@" << iSyst << "<0)*TMath::Power(" << 1./ratiosyst[1] << ",@" << iSyst << "))";
+	    } else 
+		    lFormula << "*( TMath::Power(" << ratiosyst[0] << ",@" << iSyst << ") )";
+	    }
 	    nuisances.add(*(TFsysts[iN]));
+	    iSyst++;
 	  }
 
 
