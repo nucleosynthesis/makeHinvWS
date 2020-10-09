@@ -586,9 +586,9 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	    if (fabs(ratiosyst[0]-1) < 0.001 and fabs(1- 1./ratiosyst[1]) < 0.001) { 
 	      continue;
 	    }
-	    if fabs(ratiosyst[0]-1./ratiosyst[1]) > 0.001 { 
+	    if (fabs(ratiosyst[0]-1./ratiosyst[1]) > 0.001) { 
 		    lFormula << "*( (@" << iSyst << ">=0)*TMath::Power(" << ratiosyst[0] << ",@" << iSyst << ")+(@" << iSyst << "<0)*TMath::Power(" << 1./ratiosyst[1] << ",@" << iSyst << "))";
-	    } else 
+	    } else { 
 		    lFormula << "*( TMath::Power(" << ratiosyst[0] << ",@" << iSyst << ") )";
 	    }
 	    nuisances.add(*(TFsysts[iN]));
