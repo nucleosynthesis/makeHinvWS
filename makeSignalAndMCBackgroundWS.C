@@ -132,16 +132,16 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
     
     TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs.root");
 
-    const unsigned nP = 4;
-    std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV"};
-    std::string lJESLabel[nP] = {"VBF"	    ,"ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu"};  // for now, use the Z->vv sample calculation for ggH, VV and Top
-
-    const unsigned nN = 14;
+    const unsigned nP = 6;
+    std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV","DY","EWKZll"};
+    std::string lJESLabel[nP] = {"VBF"	    ,"ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","EWKZ2Jets_ZToNuNu"};  // for now, use the Z->vv sample calculation for ggH, VV and Top
+	
+    const unsigned nN = 15;
     std::string lSysts[nN] = {"bjet_veto","pileup","tau_veto",
 			     "eventVetoVEleIdIso", "eventVetoVEleReco", 
 			     "eventVetoLMuId","eventVetoLMuIso",
 			     "eventSelTEleIdIso","eventSelTEleReco",
-			     "eventSelVEleReco", 
+			     "eventSelVEleIdIso","eventSelVEleReco", 
 			     "eventSelTMuId","eventSelTMuIso",
       			     "eventSelLMuId","eventSelLMuIso", 
     };
