@@ -114,6 +114,8 @@ void makePlot(TDirectory *where, std::string name, std::string sys, TH1F *hC, TH
 void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR"){
 
 
+  const bool doSamSetup = false;
+  
     const bool is2017 = year=="2017";
     std::string lChannel = "VBF";
     std::string lCategory = cat+"_";
@@ -173,7 +175,7 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 	   TFile *finput = TFile::Open(lInFileName.c_str());
 
 	   std::string channel=""; 
-	   if ( iR>0 ) channel="VBF";
+	   if ( doSamSetup && iR>0 ) channel="VBF";
 	   for (unsigned iP(0); iP<nP; ++iP){
 	       if (iR>0 and iP<2) continue;
 	       std::cout << " central histogram -- " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 

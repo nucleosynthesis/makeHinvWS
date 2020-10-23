@@ -26,14 +26,18 @@ enum PROCESS{
   QCDW = 5,
   EWKW = 6,
   QCDDYll = 7,
-  EWKZll = 8
+  EWKZll = 8,
+  TOP = 9,
+  VV = 10,
+  QCD = 11
 };
 
 
 int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 
-
-    const bool is2017 = year=="2017";
+  const bool doSamSetup = false;
+  
+  const bool is2017 = year=="2017";
     // As usual, load the combine library to get access to the RooParametricHist
     gSystem->Load("libHiggsAnalysisCombinedLimit.so");
 
@@ -231,7 +235,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       
       finput[iR] = TFile::Open(lInFileName[iR].c_str());
 
-      if ( lRegions[iR] != "SR" ) finput[iR]->cd((lRegions[iR]+lChannel).c_str());
+      if ( doSamSetup && lRegions[iR] != "SR" ) finput[iR]->cd((lRegions[iR]+lChannel).c_str());
       else finput[iR]->cd(lRegions[iR].c_str());
       
       for (unsigned iP(0); iP<nP; ++iP){
