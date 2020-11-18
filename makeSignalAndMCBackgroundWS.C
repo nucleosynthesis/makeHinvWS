@@ -130,7 +130,7 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
     
     //finput->cd(lRegions.c_str());
     
-    TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs.root");
+    TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs_smooth.root");
 
     const unsigned nP = 6;
     std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV","DY","EWKZll"};
