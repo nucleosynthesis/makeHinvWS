@@ -202,8 +202,8 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 	       for (unsigned iJ(0); iJ < nJ; ++iJ){
 
 		
-		  TH1F *hSUp   = (TH1F*)finputJES->Get(Form("%s%s_%sUp_smoothed",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
-		  TH1F *hSDown = (TH1F*)finputJES->Get(Form("%s%s_%sDown_smoothed",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
+		  TH1F *hSUp   = (TH1F*)finputJES->Get(Form("%s%s_%sUp",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
+		  TH1F *hSDown = (TH1F*)finputJES->Get(Form("%s%s_%sDown",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
 		  std::cout << " Getting JES files for " << Thist->GetName() << std::endl;
 		   
 		  TH1F *hSUpnew = (TH1F*)Thist->Clone(); hSUpnew->SetName(Form("%s%s_%sUp",lRegions[iR].c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
