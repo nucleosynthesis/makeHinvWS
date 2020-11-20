@@ -114,7 +114,7 @@ void makePlot(TDirectory *where, std::string name, std::string sys, TH1F *hC, TH
 void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR"){
 
 
-  const bool doSamSetup = false;
+  const bool doSamSetup = true;
   
     const bool is2017 = year=="2017";
     std::string lChannel = "VBF";
@@ -145,9 +145,40 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 			     "eventSelTEleIdIso","eventSelTEleReco",
 			     "eventSelVEleIdIso","eventSelVEleReco", 
 			     "eventSelTMuId","eventSelTMuIso",
-      			     "eventSelLMuId","eventSelLMuIso", 
+      			     "eventSelLMuId","eventSelLMuIso" 
     };
-    
+    std::string lSystsCMS[nN] = {
+      "CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
+      "CMS_eff_eVeto_idiso_veto","CMS_eff_eVeto_reco_veto",
+      "CMS_eff_muLoose_id_veto","CMS_eff_muLoose_iso_veto",
+      "CMS_eff_eTight_idiso","CMS_eff_eTight_reco",
+      "CMS_eff_eVeto_idiso","CMS_eff_eVeto_reco",
+      "CMS_eff_muTight_id","CMS_eff_muTight_iso",
+      "CMS_eff_muLoose_id","CMS_eff_muLoose_iso"
+    };
+
+    const bool corrCat[nN] = {1,1,1,
+			      1,1,
+			      1,1,
+			      1,1,
+			      1,1,
+			      1,1,
+			      1,1
+    };
+    const bool corrYear[nN] = {1,1,0,
+			       0,1,
+			       1,1,
+			       0,1,
+			       0,1,
+			       1,1,
+			       1,1
+    };
+
+    for (unsigned iN(0); iN < nN; ++iN){
+      if (!corrCat[iN]) lSystsCMS[iN] +="_"+cat;
+      if (!corrYear[iN]) lSystsCMS[iN] += "_"+year;
+    }
+
     const unsigned nR = 5;
     std::string lRegions[nR] = {"SR","Zee","Zmumu","Wenu","Wmunu"};
 
@@ -173,26 +204,34 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 	   //std::string lRegions = "SR";
 	   std::string lInFileName = "out_VBF_ana_"+lRegions[iR]+"_"+year+"_v"+cat+"_"+year+"_200109/VBF_shapes.root";
 	   TFile *finput = TFile::Open(lInFileName.c_str());
-
+	   if (!finput) return ;
 	   std::string channel=""; 
 	   if ( doSamSetup && iR>0 ) channel="VBF";
 	   for (unsigned iP(0); iP<nP; ++iP){
 	       if (iR>0 and iP<2) continue;
 	       std::cout << " central histogram -- " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
 	       TH1F* Thist = (TH1F*)finput->Get(Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()));
+
+	       if (!Thist) {
+		 std::cout << " Histo " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << " not found." << std::endl;
+		 return ;
+	       }
 	       RooDataHist *hist = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]).c_str(),"Process",vars,Thist);
 	       wspace.import(*hist);
 
 	       for (unsigned iS(0); iS < nN; ++iS){
-	       std::cout << " up/down histograms -- " << lSysts[iS].c_str() << " , for " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
+		 std::cout << " up/down histograms -- " << lSysts[iS].c_str() << " " << lSystsCMS[iS].c_str() << " , for " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
 		 
 		 TH1F* ThistSU = (TH1F*)finput->Get(Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-		 if (!ThistSU) continue; 
-		 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSysts[iS]+"Up").c_str(),"proces",vars,ThistSU);
+		 if (!ThistSU) {
+		   std::cout << " Histo " << Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()) << " not found" << std::endl;
+		   continue;
+		 } 
+		 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Up").c_str(),"proces",vars,ThistSU);
 		 wspace.import(*histSU);	    
 
 		 TH1F* ThistSD = (TH1F*)finput->Get(Form("%s%s/%s_%sDown",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-		 RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSysts[iS]+"Down").c_str(),"proces",vars,ThistSD);
+		 RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Down").c_str(),"proces",vars,ThistSD);
 		 wspace.import(*histSD);	     
 		 
 		 makePlot(outPlots, (lProcs[iP]+"_hist_"+lRegions[iR]),lSysts[iS],Thist,ThistSU,ThistSD);

@@ -49,7 +49,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     std::string lChannel = "VBF";
     std::string lCategory = cat+"_";
     std::string lYear = year+"_";
-    std::string lOutFileName = "param_ws_"+lCategory+lYear+lChannel+".root";
+   std::string lOutFileName = "param_ws_"+lCategory+lYear+lChannel+".root";
 
     //define the variable that is fitted
     RooRealVar lVarFit(("mjj_"+cat+"_"+year).c_str(),"M_{jj} (GeV)",200,5000);
@@ -78,6 +78,16 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
                              "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco","prefiring"
     };
 
+    //following CMS naming conventions.
+    std::string lNuisCMS[21] = {"CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
+				"CMS_eff_eVeto_idiso_veto","CMS_eff_muLoose_id_veto","CMS_eff_muLoose_iso_veto",
+				"CMS_eff_eTight_idiso","CMS_eff_muTight_id","CMS_eff_muTight_iso",
+				"CMS_eff_eVeto_idiso","CMS_eff_muLoose_id","CMS_eff_muLoose_iso",
+				"NLOSF_QCDcorr_EWKproc", "NLOSF_EWKcorr_QCDproc",
+				"NLOSF_QCDcorr_QCDproc_muF","NLOSF_QCDcorr_QCDproc_muR","NLOSF_QCDcorr_QCDproc_pdf",
+				"CMS_eff_eVeto_reco", "CMS_eff_eTight_reco", "CMS_eff_eVeto_reco_veto","CMS_L1prefire"
+    };
+    
     const bool corrCat[21] = {1,1,1,
 			      1,1,1,
 			      1,1,1,
@@ -92,14 +102,26 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 			       0,1,1,
 			       1,1,
 			       1,1,1,
-			       1,1,1,1
+			       1,1,1,0
     };
 
     const unsigned nS = 2*nN+1;
     std::string lSysts[43];
+    std::string lSystsCMS[43];
     for (unsigned iS(0); iS<nS; ++iS){
       if (iS==0) lSysts[iS] = "";
       else lSysts[iS] = (iS-1)%2==0? lNuis[(iS-1)/2]+"Up" : lNuis[(iS-1)/2]+"Down";
+      if (iS==0) lSystsCMS[iS] = "";
+      else {
+	std::ostringstream lname;
+	lname << lNuisCMS[(iS-1)/2];
+	if (!corrCat[(iS-1)/2]) lname << "_" << cat;
+	if (!corrYear[(iS-1)/2]) lname << "_" << year;
+	if ((iS-1)%2==0) lname << "Up";
+	else lname << "Down";
+	lSystsCMS[iS] = lname.str();
+	//lSystsCMS[iS] = (iS-1)%2==0? lNuisCMS[(iS-1)/2]+"Up" : lNuisCMS[(iS-1)/2]+"Down";
+      }
       //std::cout << lSysts[iS] << std::endl;
     }
     const bool isSRsyst[43] = {1,1,1,1,1,
@@ -274,7 +296,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	  std::ostringstream label;
 	  label << lProcs[iP] << "_hist_" << lRegions[iR];
 	  if (iS>0) {
-	    label << "_" << lSysts[iS];
+	    label << "_" << lSystsCMS[iS];
 	  }
 	  if (histos[iR][iP][iS] && histos[iR][iP][iS]->GetEntries()>0){
 	    bkg_hist[iR][iP][iS] = new RooDataHist(label.str().c_str(),"Background",vars,histos[iR][iP][iS]);
@@ -339,11 +361,11 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     for (unsigned iN(0); iN < nN; ++iN){
       std::ostringstream lname;
       lname.str("");
-      if (!corrCat[iN]) lname << lCategory;
-      if (!corrYear[iN]) lname << lYear;
      // changing to match the naming convention used in the datacard
      // lname << "TF_syst_" << lNuis[iN];
-      lname << "" << lNuis[iN];
+      lname << lNuisCMS[iN];
+      if (!corrCat[iN]) lname << "_" << cat;
+      if (!corrYear[iN]) lname << "_" << year;
       TFsysts[iN] = new RooRealVar(lname.str().c_str(),"CR/SR ratio syst nuisance parameter",0);
     }
 
