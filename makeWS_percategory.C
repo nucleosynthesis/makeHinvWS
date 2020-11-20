@@ -35,7 +35,7 @@ enum PROCESS{
 
 int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 
-  const bool doSamSetup = false;
+  const bool doSamSetup = true;
   
   const bool is2017 = year=="2017";
     // As usual, load the combine library to get access to the RooParametricHist
@@ -87,9 +87,9 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 			      1,1,1,1
     };
     const bool corrYear[21] = {1,1,0,
-			       1,1,1,
-			       1,1,1,
-			       1,1,1,
+			       0,1,1,
+			       0,1,1,
+			       0,1,1,
 			       1,1,
 			       1,1,1,
 			       1,1,1,1
@@ -137,24 +137,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	hardCodeNuisance[iR][iS] = -1.;
       }
     }
-    //@FIXME correct lepton IDISO for now
-    //hardCodeNuisance[0][7] = 0.97;
-    //hardCodeNuisance[0][8] = 1.03;
-    for (unsigned iR(1); iR<nR; ++iR){     
-      //VetoVEleIdIso
-      //just for W regions
-      //inverted for veto, but acting on SR = denominator -> inverted twice...
-      if (iR<3) hardCodeNuisance[iR][7] = 1.03;
-      if (iR<3) hardCodeNuisance[iR][8] = 0.97;
-      //skip muon regions
-      if (iR==2 || iR==4) continue;
-      //SelTEleIdIso
-      hardCodeNuisance[iR][13] = iR==1? 1.03 : 1.06;
-      hardCodeNuisance[iR][14] = iR==1? 0.97 : 0.94;
-      //SelVEleIdIso // as counted double for tight already for Zll, just ignore this one...
-      hardCodeNuisance[iR][19] = iR==1? 1. : 1.;
-      hardCodeNuisance[iR][20] = iR==1? 1. : 1.;
-    }
+
     //input file path and name
     //input file is expected to contain one directory per region with names as in lRegions,
     //and one histogram per process with name as in lProcs with shape of the variable that is fitted.
@@ -186,11 +169,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     double jesWZSyst[nT] = {1/1.02, 1/1.01};
     double jerWZSyst[nT] = {is2017 ? 1/1.025 : 1/1.01,is2017 ? 1/1.015 : 1/1.01};
 
+    //Uncertainties to set on W/Z TF.
     //inverted because vetos...acting on numerator W.
-    double eleRecoVetoWZ = 1/1.01;
-    double eleIdIsoVetoWZ = 1/1.03;
-    double muIdVetoWZ = 1/1.005;
-    double muIsoVetoWZ = 1/1.001;
+    //double eleRecoVetoWZ = 1/1.01;
+    double eleIdIsoVetoWZ[nT] = {1/1.01,1/1.02};
+    //double muIdVetoWZ = 1/1.005;
+    //double muIsoVetoWZ = 1/1.001;
     double tauVetoWZ = 1/1.01;
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -436,10 +420,13 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
         //double WZratioSyst_muR = sam_qcd_w_histo_muR->GetBinContent(iB+1);
         //double WZratioSyst_pdf = sam_qcd_w_histo_Syst_pdf->GetBinContent(iB+1);
 
+	//for scale unc, take maximum uncertainty = that from W.
         double WZratioSyst_nom = histos[0][PROCESS::QCDW][0]->GetBinContent(iB);
         double WZratioSyst_muF = histos[0][PROCESS::QCDW][29]->GetBinContent(iB);
         double WZratioSyst_muR = histos[0][PROCESS::QCDW][31]->GetBinContent(iB);
-        double WZratioSyst_pdf = histos[0][PROCESS::QCDW][33]->GetBinContent(iB);
+	//for PDF, correlate W and Z 
+        double WZratioSyst_pdf = (histos[0][PROCESS::QCDW][0]->GetBinContent(iB) / histos[0][PROCESS::QCDZnunu][0]->GetBinContent(iB))/(histos[0][PROCESS::QCDW][33]->GetBinContent(iB) / histos[0][PROCESS::QCDZnunu][33]->GetBinContent(iB));
+
 	// Fix a small issue in the last bin of the W/Z ratio for the renorm scale
 	// For some reason the last bin is underestimated in mjj, so we use the previous one
 	/*
@@ -452,11 +439,11 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
        
         WZratioSyst_muF = 1.0*WZratioSyst_muF/WZratioSyst_nom;
         WZratioSyst_muR = 1.0*WZratioSyst_muR/WZratioSyst_nom;
-        WZratioSyst_pdf = 1.0*WZratioSyst_pdf/WZratioSyst_nom;
+        //WZratioSyst_pdf = 1.0*WZratioSyst_pdf/WZratioSyst_nom;
         std::cout<< "WZratioSyst_muF :  " << WZratioSyst_muF << std::endl;
         std::cout<< "WZratioSyst_muR :  " << WZratioSyst_muR << std::endl;
         std::cout<< "WZratioSyst_pdf :  " << WZratioSyst_pdf << std::endl;
- 
+
 	double ratio = 0;
 	double ratiostat = 0;
         double ratio_EWK_corr_on_Strong_proc = (histos[0][PROCESS::QCDW][0]->GetBinContent(iB) / histos[0][PROCESS::QCDZnunu][0]->GetBinContent(iB))/(histos[0][PROCESS::QCDW][27]->GetBinContent(iB) / histos[0][PROCESS::QCDZnunu][27]->GetBinContent(iB));
@@ -481,7 +468,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	 lFormula << "*TMath::Power(" << jerWZSyst[iT] << ",@6)";
 	 //add also lepton veto uncertainties
 	 //lFormula << "*TMath::Power(" << eleRecoVetoWZ << ",@7)";
-	 lFormula << "*TMath::Power(" << eleIdIsoVetoWZ << ",@7)";
+	 lFormula << "*TMath::Power(" << eleIdIsoVetoWZ[iT] << ",@7)";
 	 //lFormula << "*TMath::Power(" << muIdVetoWZ << ",@9)";
 	 //lFormula << "*TMath::Power(" << muIsoVetoWZ << ",@10)";
 	 lFormula << "*TMath::Power(" << tauVetoWZ << ",@8)";
