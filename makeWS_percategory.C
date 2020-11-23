@@ -79,10 +79,10 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 
   const unsigned nNLO = 4;
   std::string lNLOname[4] = {
-    "fnlo_SF_QCD_corr_QCD_proc_muF",
-    "fnlo_SF_QCD_corr_QCD_proc_muR",
-    "fnlo_SF_QCD_corr_QCD_proc_pdf",
-    "fnlo_SF_EWK_corr",
+    "fnlo_SF_QCD_corr_QCD_proc_muFUp",
+    "fnlo_SF_QCD_corr_QCD_proc_muRUp",
+    "fnlo_SF_QCD_corr_QCD_proc_pdfUp",
+    "fnlo_SF_EWK_corrUp",
   };
 
   
@@ -101,10 +101,10 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 			      1,1,1,1
     };
     const bool corrYear[16] = {1,1,0,
-			       1,1,1,
-			       1,1,1,
-			       1,1,1,
-			       1,1,1,0
+			       0,1,1,
+			       0,1,1,
+			       0,1,1,
+			       1,1,1,1
     };
 
     const unsigned nS = 2*nN+1;
@@ -208,21 +208,6 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     //to get the fNLO factors variations
     TH1F *histosNLO[nP][nNLO];
     
-    for (unsigned iP(3); iP<7; ++iP){
-      for (unsigned iS(0); iS < nNLO; ++iS){
-	histosNLO[iP][iS] = 0;
-      }
-      for (unsigned iS(0); iS < nNLO; ++iS){
-	if (iP>0) {
-	  histosNLO[iP][iS] = (TH1F*)gDirectory->Get((lProcs[iP]+"_"+lNLOname[iS]).c_str());
-	}
-	if (!histosNLO[iP][iS]) {
-	  std::cout<< " NLO Histo not found for process " << lProcs[iP] << " factor " << lNLOname[iS] << std::endl;
-	  continue;
-	}
-	std::cout << " --- histosNLO " << histosNLO[iP][iS]->GetName() << " " << histosNLO[iP][iS]->GetEntries() << " " << histosNLO[iP][iS]->Integral() << std::endl;
-      }
-    }
 
     //TH1D *sam_qcd_w_histo_nom;
     //TH1D *sam_qcd_w_histo_muR;
@@ -238,7 +223,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     //sam_qcd_w_histo_muF = (TH1D*)gDirectory->Get("mjj_Fact_Up");          
     //sam_qcd_w_histo_Syst_pdf = (TH1D*)gDirectory->Get("mjj_PDF_Up");          
       
-    
+    for (unsigned iP(0); iP<nP; ++iP){
+      for (unsigned iS(0); iS < nNLO; ++iS){
+	histosNLO[iP][iS] = 0;
+      }
+    }
+
     for (unsigned iR(0); iR<nR; ++iR){
       
       finput[iR] = TFile::Open(lInFileName[iR].c_str());
@@ -246,6 +236,22 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       if ( doSamSetup && lRegions[iR] != "SR" ) finput[iR]->cd((lRegions[iR]+lChannel).c_str());
       else finput[iR]->cd(lRegions[iR].c_str());
       
+      if (lRegions[iR] == "SR"){
+	for (unsigned iP(3); iP<7; ++iP){
+	  for (unsigned iS(0); iS < nNLO; ++iS){
+	    if (iP>0) {
+	      histosNLO[iP][iS] = (TH1F*)gDirectory->Get((lProcs[iP]+"_"+lNLOname[iS]).c_str());
+	    }
+	    if (!histosNLO[iP][iS]) {
+	      std::cout<< " NLO Histo not found for process " << lProcs[iP] << " factor " << lNLOname[iS] << std::endl;
+	      continue;
+	    }
+	    std::cout << " --- histosNLO " << histosNLO[iP][iS]->GetName() << " " << histosNLO[iP][iS]->GetEntries() << " " << histosNLO[iP][iS]->Integral() << std::endl;
+	  }
+	}
+
+      }
+
       for (unsigned iP(0); iP<nP; ++iP){
 
 	for (unsigned iS(0); iS < nS; ++iS){
