@@ -65,6 +65,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
   "DY","EWKZll",
   "TOP","VV","QCD"};
 
+  // leave fnlo for now - needed for calculation 
   const unsigned nN = is2017 ? 21 : 20;
   std::string lNuis[21] = {"bjet_veto","pileup","tau_veto",
   "eventVetoVEleIdIso","eventVetoLMuId","eventVetoLMuIso",
