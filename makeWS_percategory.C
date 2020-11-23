@@ -166,17 +166,6 @@ unsigned vproc[nT][5] = {
 };
 
 
-//values of nuisances
-double WZratioSyst = 1.12;
-
-double jesWWSyst[nT] = {is2017 ? 1.015 : 1.01, 1.01};
-double jerWWSyst[nT] = {is2017 ? 1.015 : 1.01, 1.01};
-
-double jesZZSyst = 1.01;
-double jerZZSyst = 1.01;
-
-double jesWZSyst[nT] = {1/1.02, 1/1.01};
-double jerWZSyst[nT] = {is2017 ? 1/1.025 : 1/1.01,is2017 ? 1/1.015 : 1/1.01};
 
 //inverted because vetos...acting on numerator W.
 double eleRecoVetoWZ = 1/1.01;
