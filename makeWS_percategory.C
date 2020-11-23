@@ -65,67 +65,57 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
   "DY","EWKZll",
   "TOP","VV","QCD"};
 
-  const unsigned nN = is2017 ? 21 : 20;
-  std::string lNuis[21] = {"bjet_veto","pileup","tau_veto",
+  const unsigned nN = is2017 ? 16 : 15;
+  std::string lNuis[16] = {"bjet_veto","pileup","tau_veto",
   "eventVetoVEleIdIso","eventVetoLMuId","eventVetoLMuIso",
   "eventSelTEleIdIso","eventSelTMuId","eventSelTMuIso",
   "eventSelVEleIdIso","eventSelLMuId","eventSelLMuIso",
-  "fnlo_SF_QCD_corr_EWK_proc", "fnlo_SF_EWK_corr",
-  "fnlo_SF_QCD_corr_QCD_proc_muF","fnlo_SF_QCD_corr_QCD_proc_muR","fnlo_SF_QCD_corr_QCD_proc_pdf",
+//  "fnlo_SF_QCD_corr_EWK_proc", "fnlo_SF_EWK_corr",
+//  "fnlo_SF_QCD_corr_QCD_proc_muF","fnlo_SF_QCD_corr_QCD_proc_muR","fnlo_SF_QCD_corr_QCD_proc_pdf",
   "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco","prefiring"
 };
 
-const bool corrCat[21] = {1,1,1,
+const bool corrCat[16] = {1,1,1,
   1,1,1,
   1,1,1,
   1,1,1,
-  0,0,
-  0,0,0,
   1,1,1,1
 };
-const bool corrYear[21] = {1,1,0,
+const bool corrYear[16] = {1,1,0,
   1,1,1,
   1,1,1,
-  1,1,1,
-  1,1,
   1,1,1,
   1,1,1,1
 };
 
 const unsigned nS = 2*nN+1;
-std::string lSysts[43];
+std::string lSysts[33];
 for (unsigned iS(0); iS<nS; ++iS){
   if (iS==0) lSysts[iS] = "";
   else lSysts[iS] = (iS-1)%2==0? lNuis[(iS-1)/2]+"Up" : lNuis[(iS-1)/2]+"Down";
   //std::cout << lSysts[iS] << std::endl;
 }
-const bool isSRsyst[43] = {1,1,1,1,1,
+const bool isSRsyst[33] = {1,1,1,1,1,
   1,1,1,1,1,
   1,1,1,0,0,
   0,0,0,0,0,
   0,0,0,0,0,
-  1,1,1,1,
-  1,1,1,1,1,1,
   0,0,0,0,1,1,1,1
 };
 
-const bool isCRWsyst[43] = {1,1,1,1,1,
+const bool isCRWsyst[33] = {1,1,1,1,1,
   1,1,0,0,0,
   0,0,0,1,1,
   1,1,1,1,0,
   0,0,0,0,0,
-  1,1,1,1,
-  1,1,1,1,1,1,
   0,0,1,1,0,0,1,1
 };
 
-const bool isCRZsyst[43] = {1,1,1,1,1,
+const bool isCRZsyst[33] = {1,1,1,1,1,
   1,1,0,0,0,
   0,0,0,1,1,
   1,1,1,1,1,
   1,1,1,1,1,
-  1,1,1,1,
-  1,1,1,1,1,1,
   1,1,1,1,0,0,1,1
 };
 
