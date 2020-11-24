@@ -138,14 +138,15 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
     std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV","DY","EWKZll"};
     std::string lJESLabel[nP] = {"VBF"	    ,"ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","EWKZ2Jets_ZToNuNu"};  // for now, use the Z->vv sample calculation for ggH, VV and Top
 	
-    const unsigned nN = 15;
+    const unsigned nN = 17;
     std::string lSysts[nN] = {"bjet_veto","pileup","tau_veto",
 			     "eventVetoVEleIdIso", "eventVetoVEleReco", 
 			     "eventVetoLMuId","eventVetoLMuIso",
 			     "eventSelTEleIdIso","eventSelTEleReco",
 			     "eventSelVEleIdIso","eventSelVEleReco", 
 			     "eventSelTMuId","eventSelTMuIso",
-      			     "eventSelLMuId","eventSelLMuIso" 
+			      "eventSelLMuId","eventSelLMuIso",
+			      "jetemSF","prefiring"
     };
     std::string lSystsCMS[nN] = {
       "CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
@@ -154,10 +155,12 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
       "CMS_eff_eTight_idiso","CMS_eff_eTight_reco",
       "CMS_eff_eVeto_idiso","CMS_eff_eVeto_reco",
       "CMS_eff_muTight_id","CMS_eff_muTight_iso",
-      "CMS_eff_muLoose_id","CMS_eff_muLoose_iso"
+      "CMS_eff_muLoose_id","CMS_eff_muLoose_iso",
+      "CMS_eff_jetNEMF","CMS_L1prefire"
     };
 
     const bool corrCat[nN] = {1,1,1,
+			      1,1,
 			      1,1,
 			      1,1,
 			      1,1,
@@ -171,7 +174,8 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 			       0,1,
 			       0,1,
 			       1,1,
-			       1,1
+			       1,1,
+			       0,0
     };
 
     for (unsigned iN(0); iN < nN; ++iN){

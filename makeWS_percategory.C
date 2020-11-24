@@ -77,38 +77,42 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     "fnlo_SF_EWK_corrUp",
   };
   
-  const unsigned nN = is2017 ? 16 : 15;
-  std::string lNuis[16] = {"bjet_veto","pileup","tau_veto",
+  const unsigned nN = is2017 ? 17 : 16;
+  std::string lNuis[17] = {"bjet_veto","pileup","tau_veto",
 			   "eventVetoVEleIdIso","eventVetoLMuId","eventVetoLMuIso",
 			   "eventSelTEleIdIso","eventSelTMuId","eventSelTMuIso",
 			   "eventSelVEleIdIso","eventSelLMuId","eventSelLMuIso",
-			   "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco","prefiring"
+			   "eventSelVEleReco", "eventSelTEleReco", "eventVetoVEleReco",
+			   "jetemSF","prefiring"
   };
 
   //following CMS naming conventions.
-  std::string lNuisCMS[16] = {"CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
+  std::string lNuisCMS[17] = {"CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
 			      "CMS_eff_eVeto_idiso_veto","CMS_eff_muLoose_id_veto","CMS_eff_muLoose_iso_veto",
 			      "CMS_eff_eTight_idiso","CMS_eff_muTight_id","CMS_eff_muTight_iso",
 			      "CMS_eff_eVeto_idiso","CMS_eff_muLoose_id","CMS_eff_muLoose_iso",
-			      "CMS_eff_eVeto_reco", "CMS_eff_eTight_reco", "CMS_eff_eVeto_reco_veto","CMS_L1prefire"
+			      "CMS_eff_eVeto_reco", "CMS_eff_eTight_reco", "CMS_eff_eVeto_reco_veto",
+			      "CMS_eff_jetNEMF","CMS_L1prefire"
   };
     
-  const bool corrCat[16] = {1,1,1,
+  const bool corrCat[17] = {1,1,1,
 			    1,1,1,
 			    1,1,1,
 			    1,1,1,
-			    1,1,1,1
+			    1,1,1,
+			    1,1
   };
-  const bool corrYear[16] = {1,1,0,
+  const bool corrYear[17] = {1,1,0,
 			     0,1,1,
 			     0,1,1,
 			     0,1,1,
-			     1,1,1,1
+			     1,1,1,
+			     0,1
   };
 
   const unsigned nS = 2*nN+1;
-  std::string lSysts[33];
-  std::string lSystsCMS[33];
+  std::string lSysts[35];
+  std::string lSystsCMS[35];
   for (unsigned iS(0); iS<nS; ++iS){
     if (iS==0) lSysts[iS] = "";
     else lSysts[iS] = (iS-1)%2==0? lNuis[(iS-1)/2]+"Up" : lNuis[(iS-1)/2]+"Down";
@@ -126,29 +130,32 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
     //std::cout << lSysts[iS] << std::endl;
   }
 
-  const bool isSRsyst[33] = {1,1,1,1,1,
+  const bool isSRsyst[35] = {1,1,1,1,1,
 			     1,1,1,1,1,
 			     1,1,1,0,0,
 			     0,0,0,0,0,
 			     0,0,0,0,0,
-			     0,0,0,0,1,1,1,1
+			     0,0,0,0,1,1,
+			     1,1,1,1
   };
     
-  const bool isCRWsyst[33] = {1,1,1,1,1,
+  const bool isCRWsyst[35] = {1,1,1,1,1,
 			      1,1,0,0,0,
 			      0,0,0,1,1,
 			      1,1,1,1,0,
 			      0,0,0,0,0,
-			      0,0,1,1,0,0,1,1
+			      0,0,1,1,0,0,
+			      1,1,1,1
   };
 
 
-  const bool isCRZsyst[33] = {1,1,1,1,1,
+  const bool isCRZsyst[35] = {1,1,1,1,1,
 			      1,1,0,0,0,
 			      0,0,0,1,1,
 			      1,1,1,1,1,
 			      1,1,1,1,1,
-			      1,1,1,1,0,0,1,1
+			      1,1,1,1,0,0,
+			      1,1,1,1
   };
 
   //possibility to override nuisances with hardcoded values
