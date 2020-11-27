@@ -23,10 +23,12 @@
 // This script produces workspaces to make the signal and smaller background nominal and uncertainty shapes 
 
 enum PROCESS{
-  VBFH = 0,
-  ggH  = 1,
-  TOP  = 2,
-  VV   = 3,
+  VBFH   = 0,
+  ggH    = 1,
+  TOP    = 2,
+  VV     = 3,
+  DY     = 4,
+  EWKZll = 5
 };
 
 double findmax(TH1F *h){
@@ -116,167 +118,187 @@ void makeSignalAndMCBackgroundWS(std::string year="2017", std::string cat="MTR")
 
   const bool doSamSetup = true;
   
-    const bool is2017 = year=="2017";
-    std::string lChannel = "VBF";
-    std::string lCategory = cat+"_";
-    std::string lYear = year+"_";
-    std::string lOutFileName = "signal_mc_bkgs_ws_"+lCategory+lYear+lChannel+".root";
+  const bool is2017 = year=="2017";
+  std::string lChannel = "VBF";
+  std::string lCategory = cat+"_";
+  std::string lYear = year+"_";
+  std::string lOutFileName = "signal_mc_bkgs_ws_"+lCategory+lYear+lChannel+".root";
+  
+  //define the variable that is fitted
+  RooRealVar lVarFit(("mjj_"+cat+"_"+year).c_str(),"M_{jj} (GeV)",200,5000);
+  std::string lVarLabel = "Mjj";
+  
+  TFile *fOut = new TFile(lOutFileName.c_str(),"RECREATE");
+  RooWorkspace wspace("wspace_signal","wspace_signal");
+  RooArgList vars(lVarFit);
+  
+  //finput->cd(lRegions.c_str());
+  
+  TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs_smooth.root");
+  
+  const unsigned nP = 6;
+  //!! Mind that order is the same as in PROCESS enum above !!
+  std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV","DY","EWKZll"};
+  std::string lJESLabel[nP] = {"VBF","ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","EWKZ2Jets_ZToNuNu"};  // for now, use the Z->vv sample calculation for ggH, VV and Top
+  
+  const unsigned nN = 17;
+  std::string lSysts[nN] = {"bjet_veto","pileup","tau_veto",
+			    "eventVetoVEleIdIso", "eventVetoVEleReco", 
+			    "eventVetoLMuId","eventVetoLMuIso",
+			    "eventSelTEleIdIso","eventSelTEleReco",
+			    "eventSelVEleIdIso","eventSelVEleReco", 
+			    "eventSelTMuId","eventSelTMuIso",
+			    "eventSelLMuId","eventSelLMuIso",
+			    "jetemSF","prefiring"
+  };
 
-    //define the variable that is fitted
-    RooRealVar lVarFit(("mjj_"+cat+"_"+year).c_str(),"M_{jj} (GeV)",200,5000);
-    std::string lVarLabel = "Mjj";
-    
-    TFile *fOut = new TFile(lOutFileName.c_str(),"RECREATE");
-    RooWorkspace wspace("wspace_signal","wspace_signal");
-    RooArgList vars(lVarFit);
-    
-    //finput->cd(lRegions.c_str());
-    
-    TFile *finputJES = TFile::Open("../vbf_shape_jes_uncs_smooth.root");
-
-    const unsigned nP = 6;
-    std::string lProcs[nP]    = {"VBFHtoInv","GluGluHtoInv","TOP","VV","DY","EWKZll"};
-    std::string lJESLabel[nP] = {"VBF"	    ,"ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","ZJetsToNuNu","EWKZ2Jets_ZToNuNu"};  // for now, use the Z->vv sample calculation for ggH, VV and Top
-	
-    const unsigned nN = 17;
-    std::string lSysts[nN] = {"bjet_veto","pileup","tau_veto",
-			     "eventVetoVEleIdIso", "eventVetoVEleReco", 
-			     "eventVetoLMuId","eventVetoLMuIso",
-			     "eventSelTEleIdIso","eventSelTEleReco",
-			     "eventSelVEleIdIso","eventSelVEleReco", 
-			     "eventSelTMuId","eventSelTMuIso",
-			      "eventSelLMuId","eventSelLMuIso",
-			      "jetemSF","prefiring"
-    };
-    std::string lSystsCMS[nN] = {
-      "CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
-      "CMS_eff_eVeto_idiso_veto","CMS_eff_eVeto_reco_veto",
-      "CMS_eff_muLoose_id_veto","CMS_eff_muLoose_iso_veto",
-      "CMS_eff_eTight_idiso","CMS_eff_eTight_reco",
-      "CMS_eff_eVeto_idiso","CMS_eff_eVeto_reco",
-      "CMS_eff_muTight_id","CMS_eff_muTight_iso",
-      "CMS_eff_muLoose_id","CMS_eff_muLoose_iso",
-      "CMS_eff_jetNEMF","CMS_L1prefire"
-    };
-
-    const bool corrCat[nN] = {1,1,1,
-			      1,1,
-			      1,1,
-			      1,1,
-			      1,1,
-			      1,1,
-			      1,1,
-			      1,1
-    };
-    const bool corrYear[nN] = {1,1,0,
-			       0,1,
-			       1,1,
-			       0,1,
-			       0,1,
-			       1,1,
-			       1,1,
-			       0,0
-    };
-
+  //hardcode bool for skipping syst for given proc
+  bool skipSyst[nP][nN];
+  for (unsigned iP(0); iP<nP; ++iP){
     for (unsigned iN(0); iN < nN; ++iN){
-      if (!corrCat[iN]) lSystsCMS[iN] +="_"+cat;
-      if (!corrYear[iN]) lSystsCMS[iN] += "_"+year;
+      skipSyst[iP][iN] = false;
     }
-
-    const unsigned nR = 5;
-    std::string lRegions[nR] = {"SR","Zee","Zmumu","Wenu","Wmunu"};
-
-    const unsigned nJ = 11;
-    std::string lJes[nJ] = {
-		  "jesAbsolute"
-		 , Form("jesAbsolute_%s",year.c_str())
-		 , "jesBBEC1"
-		 , Form("jesBBEC1_%s",year.c_str())
-		 , "jesEC2"
-		 , Form("jesEC2_%s",year.c_str())
-		 , "jesFlavorQCD"
-		 , "jesHF"
-		 , Form("jesHF_%s",year.c_str())
-		 , "jesRelativeBal"
-		 , Form("jesRelativeSample_%s",year.c_str())
-    };
+  }
+  
+  skipSyst[PROCESS::TOP][16] = true;
+  skipSyst[PROCESS::VV][16] = true;
+  skipSyst[PROCESS::DY][16] = true;
+  skipSyst[PROCESS::EWKZll][16] = true;
 
 
-   TDirectory *outPlots = fOut->mkdir("Plots");
-
-   for (unsigned iR(0); iR<nR; ++iR){
-	   //std::string lRegions = "SR";
-	   std::string lInFileName = "out_VBF_ana_"+lRegions[iR]+"_"+year+"_v"+cat+"_"+year+"_200109/VBF_shapes.root";
-	   TFile *finput = TFile::Open(lInFileName.c_str());
-	   if (!finput) return ;
-	   std::string channel=""; 
-	   if ( doSamSetup && iR>0 ) channel="VBF";
-	   for (unsigned iP(0); iP<nP; ++iP){
-	       if (iR>0 and iP<2) continue;
-	       std::cout << " central histogram -- " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
-	       TH1F* Thist = (TH1F*)finput->Get(Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()));
-
-	       if (!Thist) {
-		 std::cout << " Histo " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << " not found." << std::endl;
-		 return ;
-	       }
-	       RooDataHist *hist = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]).c_str(),"Process",vars,Thist);
-	       wspace.import(*hist);
-
-	       for (unsigned iS(0); iS < nN; ++iS){
-		 std::cout << " up/down histograms -- " << lSysts[iS].c_str() << " " << lSystsCMS[iS].c_str() << " , for " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
-		 
-		 TH1F* ThistSU = (TH1F*)finput->Get(Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-		 if (!ThistSU) {
-		   std::cout << " Histo " << Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()) << " not found" << std::endl;
-		   continue;
-		 } 
-		 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Up").c_str(),"proces",vars,ThistSU);
-		 wspace.import(*histSU);	    
-
-		 TH1F* ThistSD = (TH1F*)finput->Get(Form("%s%s/%s_%sDown",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
-		 RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Down").c_str(),"proces",vars,ThistSD);
-		 wspace.import(*histSD);	     
-		 
-		 makePlot(outPlots, (lProcs[iP]+"_hist_"+lRegions[iR]),lSysts[iS],Thist,ThistSU,ThistSD);
-	       }
-
-		  std::cout << " Should all be good? " << Thist->GetName() << std::endl;
-	       // now create the variations due to the different sources of JES
-	       std::cout << finputJES->GetName() <<std::endl;
-	       for (unsigned iJ(0); iJ < nJ; ++iJ){
-
-		
-		  TH1F *hSUp   = (TH1F*)finputJES->Get(Form("%s%s_%sUp",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
-		  TH1F *hSDown = (TH1F*)finputJES->Get(Form("%s%s_%sDown",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
-		  std::cout << " Getting JES files for " << Thist->GetName() << std::endl;
-		   
-		  TH1F *hSUpnew = (TH1F*)Thist->Clone(); hSUpnew->SetName(Form("%s%s_%sUp",lRegions[iR].c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
-		  TH1F *hSDownnew = (TH1F*)Thist->Clone(); hSDownnew->SetName(Form("%s%s_%sDown",lRegions[iR].c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
-		  std::cout << " Filling Up/Down JES for " << Thist->GetName() << std::endl;
-		  for (int b=1; b <= Thist->GetNbinsX() ; b++){
-			double xv = hSUpnew->GetBinCenter(b);
-			double yv = hSUpnew->GetBinContent(b);
-			if ( xv > hSUp->GetBinLowEdge(hSUp->GetNbinsX()) ) xv = hSUp->GetBinLowEdge(hSUp->GetNbinsX())+0.5*hSUp->GetBinWidth(hSUp->GetNbinsX());
-
-			hSUpnew->SetBinContent(b,yv*hSUp->GetBinContent(hSUp->FindBin(xv)));
-			hSDownnew->SetBinContent(b,yv*hSDown->GetBinContent(hSDown->FindBin(xv)));
-		  }
-		 
-		 RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_CMS_scale_j_"+lJes[iJ]+"Up").c_str(),"proces",vars,hSUpnew);
-		 RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_CMS_scale_j_"+lJes[iJ]+"Down").c_str(),"proces",vars,hSDownnew);
-		 wspace.import(*histSU);
-		 wspace.import(*histSD);
-		 
-		 makePlot(outPlots, (lProcs[iP]+"_hist_"+lRegions[iR]),lJes[iJ],Thist,hSUpnew,hSDownnew);
-
-		}
-
-	   }
-   }
-
-
-   fOut->WriteTObject(&wspace);
-
+  std::string lSystsCMS[nN] = {
+    "CMS_eff_bveto","CMS_pileup","CMS_eff_tauveto",
+    "CMS_eff_eVeto_idiso_veto","CMS_eff_eVeto_reco_veto",
+    "CMS_eff_muLoose_id_veto","CMS_eff_muLoose_iso_veto",
+    "CMS_eff_eTight_idiso","CMS_eff_eTight_reco",
+    "CMS_eff_eVeto_idiso","CMS_eff_eVeto_reco",
+    "CMS_eff_muTight_id","CMS_eff_muTight_iso",
+    "CMS_eff_muLoose_id","CMS_eff_muLoose_iso",
+    "CMS_eff_jetNEMF","CMS_L1prefire"
+  };
+  
+  const bool corrCat[nN] = {1,1,1,
+			    1,1,
+			    1,1,
+			    1,1,
+			    1,1,
+			    1,1,
+			    1,1,
+			    1,1
+  };
+  const bool corrYear[nN] = {1,1,0,
+			     0,1,
+			     1,1,
+			     0,1,
+			     0,1,
+			     1,1,
+			     1,1,
+			     0,0
+  };
+  
+  for (unsigned iN(0); iN < nN; ++iN){
+    if (!corrCat[iN]) lSystsCMS[iN] +="_"+cat;
+    if (!corrYear[iN]) lSystsCMS[iN] += "_"+year;
+  }
+  
+  const unsigned nR = 5;
+  std::string lRegions[nR] = {"SR","Zee","Zmumu","Wenu","Wmunu"};
+  
+  const unsigned nJ = 11;
+  std::string lJes[nJ] = {
+    "jesAbsolute"
+    , Form("jesAbsolute_%s",year.c_str())
+    , "jesBBEC1"
+    , Form("jesBBEC1_%s",year.c_str())
+    , "jesEC2"
+    , Form("jesEC2_%s",year.c_str())
+    , "jesFlavorQCD"
+    , "jesHF"
+    , Form("jesHF_%s",year.c_str())
+    , "jesRelativeBal"
+    , Form("jesRelativeSample_%s",year.c_str())
+  };
+  
+  
+  TDirectory *outPlots = fOut->mkdir("Plots");
+  
+  for (unsigned iR(0); iR<nR; ++iR){
+    //std::string lRegions = "SR";
+    std::string lInFileName = "out_VBF_ana_"+lRegions[iR]+"_"+year+"_v"+cat+"_"+year+"_200109/VBF_shapes.root";
+    TFile *finput = TFile::Open(lInFileName.c_str());
+    if (!finput) return ;
+    std::string channel=""; 
+    if ( doSamSetup && iR>0 ) channel="VBF";
+    for (unsigned iP(0); iP<nP; ++iP){
+      if (iR>0 and iP<2) continue;
+      std::cout << " central histogram -- " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
+      TH1F* Thist = (TH1F*)finput->Get(Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()));
+      
+      if (!Thist) {
+	std::cout << " Histo " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << " not found." << std::endl;
+	return ;
+      }
+      RooDataHist *hist = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]).c_str(),"Process",vars,Thist);
+      wspace.import(*hist);
+      
+      for (unsigned iS(0); iS < nN; ++iS){
+	if (skipSyst[iP][iS]) {
+	  std::cout << " -- Skip systematic " << lSysts[iS] << " for process " << lProcs[iP] << std::endl;
+	  continue;
+	}
+	std::cout << " up/down histograms -- " << lSysts[iS].c_str() << " " << lSystsCMS[iS].c_str() << " , for " << Form("%s%s/%s",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str()) << std::endl; 
+	
+	TH1F* ThistSU = (TH1F*)finput->Get(Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
+	if (!ThistSU) {
+	  std::cout << " Histo " << Form("%s%s/%s_%sUp",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()) << " not found" << std::endl;
+	  continue;
+	} 
+	RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Up").c_str(),"proces",vars,ThistSU);
+	wspace.import(*histSU);	    
+	
+	TH1F* ThistSD = (TH1F*)finput->Get(Form("%s%s/%s_%sDown",lRegions[iR].c_str(),channel.c_str(),lProcs[iP].c_str(),lSysts[iS].c_str()));
+	RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_"+lSystsCMS[iS]+"Down").c_str(),"proces",vars,ThistSD);
+	wspace.import(*histSD);	     
+	
+	makePlot(outPlots, (lProcs[iP]+"_hist_"+lRegions[iR]),lSysts[iS],Thist,ThistSU,ThistSD);
+      }
+      
+      std::cout << " Should all be good? " << Thist->GetName() << std::endl;
+      // now create the variations due to the different sources of JES
+      std::cout << finputJES->GetName() <<std::endl;
+      for (unsigned iJ(0); iJ < nJ; ++iJ){
+	
+	
+	TH1F *hSUp   = (TH1F*)finputJES->Get(Form("%s%s_%sUp",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
+	TH1F *hSDown = (TH1F*)finputJES->Get(Form("%s%s_%sDown",lJESLabel[iP].c_str(),year.c_str(),lJes[iJ].c_str()));
+	std::cout << " Getting JES files for " << Thist->GetName() << std::endl;
+	
+	TH1F *hSUpnew = (TH1F*)Thist->Clone(); hSUpnew->SetName(Form("%s%s_%sUp",lRegions[iR].c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
+	TH1F *hSDownnew = (TH1F*)Thist->Clone(); hSDownnew->SetName(Form("%s%s_%sDown",lRegions[iR].c_str(),lProcs[iP].c_str(),lJes[iJ].c_str()));
+	std::cout << " Filling Up/Down JES for " << Thist->GetName() << std::endl;
+	for (int b=1; b <= Thist->GetNbinsX() ; b++){
+	  double xv = hSUpnew->GetBinCenter(b);
+	  double yv = hSUpnew->GetBinContent(b);
+	  if ( xv > hSUp->GetBinLowEdge(hSUp->GetNbinsX()) ) xv = hSUp->GetBinLowEdge(hSUp->GetNbinsX())+0.5*hSUp->GetBinWidth(hSUp->GetNbinsX());
+	  
+	  hSUpnew->SetBinContent(b,yv*hSUp->GetBinContent(hSUp->FindBin(xv)));
+	  hSDownnew->SetBinContent(b,yv*hSDown->GetBinContent(hSDown->FindBin(xv)));
+	}
+	
+	RooDataHist *histSU = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_CMS_scale_j_"+lJes[iJ]+"Up").c_str(),"proces",vars,hSUpnew);
+	RooDataHist *histSD = new RooDataHist((lProcs[iP]+"_hist_"+lRegions[iR]+"_CMS_scale_j_"+lJes[iJ]+"Down").c_str(),"proces",vars,hSDownnew);
+	wspace.import(*histSU);
+	wspace.import(*histSD);
+	
+	makePlot(outPlots, (lProcs[iP]+"_hist_"+lRegions[iR]),lJes[iJ],Thist,hSUpnew,hSDownnew);
+	
+      }
+      
+    }
+  }
+  
+  
+  fOut->WriteTObject(&wspace);
+  
 };
 

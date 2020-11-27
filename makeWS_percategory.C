@@ -62,12 +62,12 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
   std::string lRegions[5] = {"SR","Wenu","Wmunu","Zee","Zmumu"};
   //processes
   //use same order: data= process 0, signal = process 1, QCD Z+Jets in SR = 2, etc....
-  const unsigned nP = 12;
+  const unsigned nP = 9;
   std::string lProcs[nP] = {"data_obs","VBFHtoInv","GluGluHtoInv",
 			    "ZJETS","EWKZNUNU",
 			    "WJETS","EWKW",
-			    "DY","EWKZll",
-			    "TOP","VV","QCD"};
+			    "DY","EWKZll"};
+  //,"TOP","VV","QCD"};
 
   const unsigned nNLO = 4;
   std::string lNLOname[4] = {
