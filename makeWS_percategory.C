@@ -399,6 +399,14 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       
     RooFormulaVar *EWKQCDbin = 0;
       
+    lname.str("");
+    lname << lCategory << lYear;
+    lname << "W_SR_freebin" << iB;
+
+    RooRealVar WZbinfreescale(lname.str().c_str()," W+jets free release parameter per bin",1,0,100);
+    WZbinfreescale.SetConstant(true); // by default use the typical scheme
+    wspace.import(WZbinfreescale,RooFit::RecycleConflictNodes());
+
     for (unsigned iT(0); iT<nT; ++iT){
 
       std::cout << " --- Processing type " << lType[iT] << std::endl;
@@ -407,7 +415,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       lname << lCategory << lYear;
       lname << lType[iT] << "Z_SR_bin" << iB;
       RooRealVar binParZ(lname.str().c_str(),(lType[iT]+" Z+jets yield in signal region, per bin").c_str(),histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB),0,10*histos[0][iT==0?PROCESS::QCDZnunu:PROCESS::EWKZnunu][0]->GetBinContent(iB));
-
+      
       std::cout << "Importing " << binParZ.GetName() <<std::endl;
       wspace.import(binParZ,RooFit::RecycleConflictNodes());
       std::cout << " ..... done " <<std::endl;
@@ -435,9 +443,6 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
 	lname << "EWKQCD_SR_bin" << iB;
 	EWKQCDbin = new RooFormulaVar(lname.str().c_str(),"EWK Z+jets yield in signal regions from QCD Z yield, per bin","@0*@1",RooArgList(TFEWKQCD,binParZ));
 	wspace.import((*EWKQCDbin),RooFit::RecycleConflictNodes());
-
-
-
 
       }
       //lname.str("");
@@ -543,7 +548,7 @@ int makeWS_percategory(std::string year="2017", std::string cat="MTR"){
       lname.str("");
       lname << lCategory << lYear;
       lname << lType[iT] << "WZ_SR_bin" << iB;
-      RooFormulaVar WZbin(lname.str().c_str(),(lType[iT]+" W+jets yield in signal regions from Z yield, per bin").c_str(),"@0*@1",iT==0?RooArgList(*TFWZ,binParZ):RooArgList(*TFWZ,*(EWKQCDbin)));
+      RooFormulaVar WZbin(lname.str().c_str(),(lType[iT]+" W+jets yield in signal regions from Z yield, per bin").c_str(),"@0*@1*@2",iT==0?RooArgList(*TFWZ,binParZ,WZbinfreescale):RooArgList(*TFWZ,*(EWKQCDbin),WZbinfreescale));
       wspace.import(WZbin,RooFit::RecycleConflictNodes());
 
 
